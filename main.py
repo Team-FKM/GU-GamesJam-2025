@@ -16,6 +16,8 @@ WHITE = (255, 255, 255)
 START_COLOR = (0, 128, 255)
 END_COLOR = (255, 255, 255)
 
+CURRENT_ROOM = 'room2A'
+
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Platformer")
@@ -70,7 +72,7 @@ def main():
     all_sprites.add(player)
 
     # Load platforms from JSON file
-    platforms_data = load_platforms('room.json')
+    platforms_data = load_platforms(f'levels/{CURRENT_ROOM}.json')
     for platform_data in platforms_data:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
         platforms.add(platform)

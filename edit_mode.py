@@ -28,13 +28,27 @@ pygame.display.set_caption("Edit Mode (Zoomed Out)")
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
 
+# List of room filenames
+ROOMS = [
+    'levels/room1A.json',
+    'levels/room1B.json',
+    'levels/room2A.json',
+    'levels/room2B.json',
+    'levels/room3A.json',
+    'levels/room3B.json',
+]
+
 def load_platforms(filename):
-    with open(filename, 'r') as file:
-        platforms_data = json.load(file)
-    return platforms_data
+    """Load platforms from a JSON file."""
+    try:
+        with open(filename, 'r') as file:
+            platforms_data = json.load(file)
+        return platforms_data
+    except FileNotFoundError:
+        return []  # Return an empty list if the file doesn't exist
 
 def save_platforms(filename, platforms):
-    # Save platforms with their original (unscaled) positions
+    """Save platforms to a JSON file."""
     platforms_data = [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height} for p in platforms]
     with open(filename, 'w') as file:
         json.dump(platforms_data, file, indent=4)
@@ -44,8 +58,11 @@ def main():
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
 
-    # Load platforms from JSON file
-    platforms_data = load_platforms('room.json')
+    # Current room index
+    current_room_index = 0
+
+    # Load platforms for the current room
+    platforms_data = load_platforms(ROOMS[current_room_index])
     for platform_data in platforms_data:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
         platforms.add(platform)
@@ -58,10 +75,17 @@ def main():
     # Load button images
     add_button_image = pygame.image.load('sprites/edit_mode/add_button.png').convert_alpha()
     remove_button_image = pygame.image.load('sprites/edit_mode/remove_button.png').convert_alpha()
+    prev_button_image = pygame.image.load('sprites/edit_mode/prev_button.png').convert_alpha()
+    next_button_image = pygame.image.load('sprites/edit_mode/next_button.png').convert_alpha()
 
     # Button positions (not scaled)
     add_button_rect = add_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 10))
     minus_button_rect = remove_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, BUTTON_HEIGHT + 20))
+    prev_button_rect = prev_button_image.get_rect(topleft=(10, 10))
+    next_button_rect = next_button_image.get_rect(topleft=(10 + BUTTON_WIDTH + 10, 10))
+
+    # Font for displaying room name
+    font = pygame.font.Font(None, 36)
 
     # Main edit loop
     running = True
@@ -78,6 +102,28 @@ def main():
                     new_platform = Platform(100, 100, 200, 20)
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
+                elif prev_button_rect.collidepoint(event.pos):
+                    # Switch to the previous room
+                    save_platforms(ROOMS[current_room_index], platforms)  # Save current room
+                    current_room_index = (current_room_index - 1) % len(ROOMS)
+                    platforms_data = load_platforms(ROOMS[current_room_index])
+                    platforms.empty()
+                    all_sprites.empty()
+                    for platform_data in platforms_data:
+                        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+                        platforms.add(platform)
+                        all_sprites.add(platform)
+                elif next_button_rect.collidepoint(event.pos):
+                    # Switch to the next room
+                    save_platforms(ROOMS[current_room_index], platforms)  # Save current room
+                    current_room_index = (current_room_index + 1) % len(ROOMS)
+                    platforms_data = load_platforms(ROOMS[current_room_index])
+                    platforms.empty()
+                    all_sprites.empty()
+                    for platform_data in platforms_data:
+                        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+                        platforms.add(platform)
+                        all_sprites.add(platform)
                 else:
                     for platform in platforms:
                         # Check collision with scaled platform rect
@@ -137,6 +183,8 @@ def main():
         # Draw buttons (not scaled)
         screen.blit(add_button_image, add_button_rect.topleft)
         screen.blit(remove_button_image, minus_button_rect.topleft)
+        screen.blit(prev_button_image, prev_button_rect.topleft)
+        screen.blit(next_button_image, next_button_rect.topleft)
 
         # Highlight selected platform
         if selected_platform:
@@ -148,14 +196,19 @@ def main():
             )
             pygame.draw.rect(screen, RED, scaled_selected_rect, 2)
 
+        # Display current room name
+        room_name = ROOMS[current_room_index].split('/')[-1]  # Extract filename
+        room_text = font.render(f"levels/room: {room_name}", True, BLACK)
+        screen.blit(room_text, (SCREEN_WIDTH // 2 - 100, 10))
+
         # Flip the display
         pygame.display.flip()
 
         # Cap the frame rate
         clock.tick(60)
 
-    # Save updated platforms to JSON file
-    save_platforms('room.json', platforms)
+    # Save updated platforms to the current room's JSON file
+    save_platforms(ROOMS[current_room_index], platforms)
 
     pygame.quit()
 
