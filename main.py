@@ -3,6 +3,7 @@ import sys
 import json
 import re  # For parsing room numbers
 from player import Player
+from camera import Camera
 from game_objects.platform import Platform
 from game_objects.goal import Goal
 
@@ -27,20 +28,6 @@ pygame.display.set_caption("Platformer")
 
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
-
-class Camera:
-    def __init__(self, width, height):
-        self.camera = pygame.Rect(0, 0, width, height)
-        self.width = width
-        self.height = height
-
-    def apply(self, entity):
-        return entity.rect.move(self.camera.topleft)
-
-    def update(self, target):
-        x = -target.rect.x + int(SCREEN_WIDTH / 2)
-        y = -target.rect.y + int(SCREEN_HEIGHT / 2)
-        self.camera = pygame.Rect(x, y, self.width, self.height)
 
 def draw_gradient(screen, start_color, end_color):
     """Draw a vertical gradient from start_color to end_color."""
