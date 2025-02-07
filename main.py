@@ -1,8 +1,10 @@
 import pygame
 import sys
 import json
+import re  # For parsing room numbers
 from player import Player
-from platform import Platform
+from game_objects.platform import Platform
+from game_objects.goal import Goal
 
 # Initialize Pygame
 pygame.init()
@@ -16,7 +18,8 @@ WHITE = (255, 255, 255)
 START_COLOR = (0, 128, 255)
 END_COLOR = (255, 255, 255)
 
-CURRENT_ROOM = 'room2A'
+# Initialize current room
+CURRENT_ROOM = 'room1A'  # Start with room1A
 
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -48,12 +51,75 @@ def draw_gradient(screen, start_color, end_color):
         ]
         pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))
 
-def load_platforms(filename):
-    with open(filename, 'r') as file:
-        platforms_data = json.load(file)
-    return platforms_data
+def load_level(filename):
+    """Load level data from a JSON file."""
+    try:
+        with open(filename, 'r') as file:
+            level_data = json.load(file)
+        return level_data
+    except FileNotFoundError:
+        return {'platforms': [], 'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50}}  # Default level data
+
+def increment_room(room_name):
+    """Increment the room number (e.g., room1A → room2A)."""
+    match = re.match(r'room(\d+)([A-Za-z])', room_name)
+    if match:
+        room_number = int(match.group(1))
+        room_letter = match.group(2)
+        return f'room{room_number + 1}{room_letter}'
+    return room_name  # Fallback if the room name doesn't match the pattern
+
+def reset_player_and_camera(player, camera):
+    """Reset the player and camera to the starting position."""
+    player.rect.x = SCREEN_WIDTH // 2
+    player.rect.y = SCREEN_HEIGHT // 2
+    camera.camera.x = 0
+    camera.camera.y = 0
+
+
+def next_level(player, camera, all_sprites, platforms):
+    """Move to the next level."""
+    global CURRENT_ROOM
+    CURRENT_ROOM = increment_room(CURRENT_ROOM)
+
+    # Load new level data
+    level_data = load_level(f'levels/{CURRENT_ROOM}.json')
+
+    # Clear existing platforms and goal
+    for sprite in all_sprites:
+        if isinstance(sprite, (Platform, Goal)):
+            sprite.kill()
+
+    # Load new platforms
+    for platform_data in level_data['platforms']:
+        platform = Platform(
+            platform_data['x'],
+            platform_data['y'],
+            platform_data['width'],
+            platform_data['height']
+        )
+        platforms.add(platform)
+        all_sprites.add(platform)
+
+    # Load new goal
+    goal_data = level_data['goal']
+    new_goal = Goal(
+        goal_data['x'],
+        goal_data['y'],
+        goal_data['width'],
+        goal_data['height']
+    )
+    all_sprites.add(new_goal)
+
+    # Reset player position
+    reset_player_and_camera(player, camera)
+
+    return new_goal  # Return the new goal object
+
 
 def main():
+    global CURRENT_ROOM  # Use the global CURRENT_ROOM variable
+
     # Create sprite groups
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
@@ -71,12 +137,19 @@ def main():
     player.set_platforms(platforms)
     all_sprites.add(player)
 
-    # Load platforms from JSON file
-    platforms_data = load_platforms(f'levels/{CURRENT_ROOM}.json')
-    for platform_data in platforms_data:
+    # Load level data from JSON file
+    level_data = load_level(f'levels/{CURRENT_ROOM}.json')
+
+    # Load platforms
+    for platform_data in level_data['platforms']:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
         platforms.add(platform)
         all_sprites.add(platform)
+
+    # Load goal
+    goal_data = level_data['goal']
+    goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+    all_sprites.add(goal)
 
     # Initialize camera
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -102,6 +175,12 @@ def main():
 
         # Update sprites
         all_sprites.update()
+
+        if pygame.sprite.collide_rect(player, goal):
+            # Load the new level and update the goal reference
+            goal = next_level(player, camera, all_sprites, platforms)
+            print(f"Moving to {CURRENT_ROOM}")
+
 
         # Update camera
         camera.update(player)

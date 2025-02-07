@@ -1,6 +1,7 @@
 import pygame
 import json
-from platform import Platform
+from game_objects.platform import Platform
+from game_objects.goal import Goal  # Import the Goal class
 
 # Initialize Pygame
 pygame.init()
@@ -38,20 +39,23 @@ ROOMS = [
     'levels/room3B.json',
 ]
 
-def load_platforms(filename):
-    """Load platforms from a JSON file."""
+def load_level(filename):
+    """Load level data from a JSON file."""
     try:
         with open(filename, 'r') as file:
-            platforms_data = json.load(file)
-        return platforms_data
+            level_data = json.load(file)
+        return level_data
     except FileNotFoundError:
-        return []  # Return an empty list if the file doesn't exist
+        return {'platforms': [], 'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50}}  # Default level data
 
-def save_platforms(filename, platforms):
-    """Save platforms to a JSON file."""
-    platforms_data = [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height} for p in platforms]
+def save_level(filename, platforms, goal):
+    """Save level data to a JSON file."""
+    level_data = {
+        'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height} for p in platforms],
+        'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height}
+    }
     with open(filename, 'w') as file:
-        json.dump(platforms_data, file, indent=4)
+        json.dump(level_data, file, indent=4)
 
 def main():
     # Create sprite groups
@@ -61,14 +65,21 @@ def main():
     # Current room index
     current_room_index = 0
 
-    # Load platforms for the current room
-    platforms_data = load_platforms(ROOMS[current_room_index])
-    for platform_data in platforms_data:
+    # Load level data for the current room
+    level_data = load_level(ROOMS[current_room_index])
+
+    # Load platforms
+    for platform_data in level_data['platforms']:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
         platforms.add(platform)
         all_sprites.add(platform)
 
-    selected_platform = None
+    # Load goal
+    goal_data = level_data['goal']
+    goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+    all_sprites.add(goal)
+
+    selected_object = None
     offset_x = 0
     offset_y = 0
 
@@ -104,72 +115,78 @@ def main():
                     all_sprites.add(new_platform)
                 elif prev_button_rect.collidepoint(event.pos):
                     # Switch to the previous room
-                    save_platforms(ROOMS[current_room_index], platforms)  # Save current room
+                    save_level(ROOMS[current_room_index], platforms, goal)  # Save current room
                     current_room_index = (current_room_index - 1) % len(ROOMS)
-                    platforms_data = load_platforms(ROOMS[current_room_index])
+                    level_data = load_level(ROOMS[current_room_index])
                     platforms.empty()
                     all_sprites.empty()
-                    for platform_data in platforms_data:
+                    for platform_data in level_data['platforms']:
                         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
                         platforms.add(platform)
                         all_sprites.add(platform)
+                    goal_data = level_data['goal']
+                    goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+                    all_sprites.add(goal)
                 elif next_button_rect.collidepoint(event.pos):
                     # Switch to the next room
-                    save_platforms(ROOMS[current_room_index], platforms)  # Save current room
+                    save_level(ROOMS[current_room_index], platforms, goal)  # Save current room
                     current_room_index = (current_room_index + 1) % len(ROOMS)
-                    platforms_data = load_platforms(ROOMS[current_room_index])
+                    level_data = load_level(ROOMS[current_room_index])
                     platforms.empty()
                     all_sprites.empty()
-                    for platform_data in platforms_data:
+                    for platform_data in level_data['platforms']:
                         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
                         platforms.add(platform)
                         all_sprites.add(platform)
+                    goal_data = level_data['goal']
+                    goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+                    all_sprites.add(goal)
                 else:
-                    for platform in platforms:
-                        # Check collision with scaled platform rect
-                        scaled_platform_rect = pygame.Rect(
-                            platform.rect.x * ZOOM_FACTOR,
-                            platform.rect.y * ZOOM_FACTOR,
-                            platform.rect.width * ZOOM_FACTOR,
-                            platform.rect.height * ZOOM_FACTOR
+                    for obj in all_sprites:
+                        # Check collision with scaled object rect
+                        scaled_rect = pygame.Rect(
+                            obj.rect.x * ZOOM_FACTOR,
+                            obj.rect.y * ZOOM_FACTOR,
+                            obj.rect.width * ZOOM_FACTOR,
+                            obj.rect.height * ZOOM_FACTOR
                         )
-                        if scaled_platform_rect.collidepoint(event.pos):
-                            selected_platform = platform
-                            offset_x = platform.rect.x - scaled_mouse_pos[0]
-                            offset_y = platform.rect.y - scaled_mouse_pos[1]
+                        if scaled_rect.collidepoint(event.pos):
+                            selected_object = obj
+                            offset_x = obj.rect.x - scaled_mouse_pos[0]
+                            offset_y = obj.rect.y - scaled_mouse_pos[1]
                             break
-                # Check right click to rotate
-                if event.button == 3:
-                    if selected_platform:
-                        selected_platform.rotate()
+                # Check right click to rotate (only for platforms)
+                if event.button == 3 and isinstance(selected_object, Platform):
+                    selected_object.rotate()
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                if selected_platform and minus_button_rect.collidepoint(event.pos):
-                    # Remove the platform
-                    platforms.remove(selected_platform)
-                    all_sprites.remove(selected_platform)
-                selected_platform = None
+                if selected_object and minus_button_rect.collidepoint(event.pos):
+                    # Remove the selected object
+                    if isinstance(selected_object, Platform):
+                        platforms.remove(selected_object)
+                    all_sprites.remove(selected_object)
+                selected_object = None
             elif event.type == pygame.MOUSEMOTION:
-                if selected_platform:
+                if selected_object:
                     # Scale mouse position for movement
                     scaled_mouse_pos = (event.pos[0] / ZOOM_FACTOR, event.pos[1] / ZOOM_FACTOR)
-                    selected_platform.rect.x = scaled_mouse_pos[0] + offset_x
-                    selected_platform.rect.y = scaled_mouse_pos[1] + offset_y
+                    selected_object.rect.x = scaled_mouse_pos[0] + offset_x
+                    selected_object.rect.y = scaled_mouse_pos[1] + offset_y
             elif event.type == pygame.KEYDOWN:
-                if selected_platform:
+                if selected_object and isinstance(selected_object, Platform):
                     if event.key == pygame.K_w:
-                        selected_platform.rect.width += 10
+                        selected_object.rect.width += 10
                     elif event.key == pygame.K_s:
-                        selected_platform.rect.width = max(10, selected_platform.rect.width - 10)
+                        selected_object.rect.width = max(10, selected_object.rect.width - 10)
                     # Update the platform's image to reflect the new width
-                    selected_platform.image = pygame.Surface((selected_platform.rect.width, selected_platform.rect.height))
-                    selected_platform.width, selected_platform.height = selected_platform.rect.width, selected_platform.rect.height
-                    selected_platform.image.fill(BLACK)
+                    selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
+                    selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
+                    selected_object.image.fill(BLACK)
 
         # Draw everything
         screen.fill(WHITE)
 
-        # Draw platforms with scaling
+        # Draw objects with scaling
         for sprite in all_sprites:
             scaled_rect = pygame.Rect(
                 sprite.rect.x * ZOOM_FACTOR,
@@ -186,19 +203,19 @@ def main():
         screen.blit(prev_button_image, prev_button_rect.topleft)
         screen.blit(next_button_image, next_button_rect.topleft)
 
-        # Highlight selected platform
-        if selected_platform:
+        # Highlight selected object
+        if selected_object:
             scaled_selected_rect = pygame.Rect(
-                selected_platform.rect.x * ZOOM_FACTOR,
-                selected_platform.rect.y * ZOOM_FACTOR,
-                selected_platform.rect.width * ZOOM_FACTOR,
-                selected_platform.rect.height * ZOOM_FACTOR
+                selected_object.rect.x * ZOOM_FACTOR,
+                selected_object.rect.y * ZOOM_FACTOR,
+                selected_object.rect.width * ZOOM_FACTOR,
+                selected_object.rect.height * ZOOM_FACTOR
             )
             pygame.draw.rect(screen, RED, scaled_selected_rect, 2)
 
         # Display current room name
         room_name = ROOMS[current_room_index].split('/')[-1]  # Extract filename
-        room_text = font.render(f"levels/room: {room_name}", True, BLACK)
+        room_text = font.render(f"Room: {room_name}", True, BLACK)
         screen.blit(room_text, (SCREEN_WIDTH // 2 - 100, 10))
 
         # Flip the display
@@ -207,8 +224,8 @@ def main():
         # Cap the frame rate
         clock.tick(60)
 
-    # Save updated platforms to the current room's JSON file
-    save_platforms(ROOMS[current_room_index], platforms)
+    # Save updated level data to the current room's JSON file
+    save_level(ROOMS[current_room_index], platforms, goal)
 
     pygame.quit()
 
