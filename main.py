@@ -1,11 +1,13 @@
 import pygame
 import sys
 import json
+import os
 import re  # For parsing room numbers
 from player import Player
 from camera import Camera
 from game_objects.platform import Platform
 from game_objects.goal import Goal
+from game_objects.decoration import Decoration
 
 # Initialize Pygame
 pygame.init()
@@ -29,6 +31,14 @@ pygame.display.set_caption("Platformer")
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
 
+# Load all decoration types
+DECORATION_TYPES = {
+    name.split('.')[0]: pygame.image.load(os.path.join('sprites/decorations', name)).convert_alpha()
+    for name in os.listdir('sprites/decorations')
+    if name.endswith('.png')
+}
+
+
 def draw_gradient(screen, start_color, end_color):
     """Draw a vertical gradient from start_color to end_color."""
     for y in range(SCREEN_HEIGHT):
@@ -38,14 +48,22 @@ def draw_gradient(screen, start_color, end_color):
         ]
         pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))
 
+
 def load_level(filename):
     """Load level data from a JSON file."""
     try:
         with open(filename, 'r') as file:
             level_data = json.load(file)
+            if 'decorations' not in level_data:  # Add support for older files
+                level_data['decorations'] = []
         return level_data
     except FileNotFoundError:
-        return {'platforms': [], 'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50}}  # Default level data
+        return {
+            'platforms': [],
+            'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50},
+            'decorations': []
+        }
+
 
 def increment_room(room_name):
     """Increment the room number (e.g., room1A → room2A)."""
@@ -55,6 +73,7 @@ def increment_room(room_name):
         room_letter = match.group(2)
         return f'room{room_number + 1}{room_letter}'
     return room_name  # Fallback if the room name doesn't match the pattern
+
 
 def reset_player_and_camera(player, camera):
     """Reset the player and camera to the starting position."""
@@ -72,9 +91,9 @@ def next_level(player, camera, all_sprites, platforms):
     # Load new level data
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
 
-    # Clear existing platforms and goal
+    # Clear existing platforms, decorations, and goal
     for sprite in all_sprites:
-        if isinstance(sprite, (Platform, Goal)):
+        if isinstance(sprite, (Platform, Goal, Decoration)):
             sprite.kill()
 
     # Load new platforms
@@ -87,6 +106,16 @@ def next_level(player, camera, all_sprites, platforms):
         )
         platforms.add(platform)
         all_sprites.add(platform)
+
+    # Load new decorations
+    for decoration_data in level_data.get('decorations', []):
+        decoration = Decoration(
+            DECORATION_TYPES[decoration_data['type']],
+            decoration_data['x'],
+            decoration_data['y']
+        )
+        decoration.decoration_type = decoration_data['type']
+        all_sprites.add(decoration)
 
     # Load new goal
     goal_data = level_data['goal']
@@ -133,6 +162,16 @@ def main():
         platforms.add(platform)
         all_sprites.add(platform)
 
+    # Load decorations
+    for decoration_data in level_data.get('decorations', []):
+        decoration = Decoration(
+            DECORATION_TYPES[decoration_data['type']],
+            decoration_data['x'],
+            decoration_data['y']
+        )
+        decoration.decoration_type = decoration_data['type']
+        all_sprites.add(decoration)
+
     # Load goal
     goal_data = level_data['goal']
     goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
@@ -168,14 +207,19 @@ def main():
             goal = next_level(player, camera, all_sprites, platforms)
             print(f"Moving to {CURRENT_ROOM}")
 
-
         # Update camera
         camera.update(player)
 
         # Draw everything
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
-        for sprite in all_sprites:
+
+        # Sort sprites by y position for proper layering
+        # Player and platforms are drawn on top of decorations
+        sorted_sprites = sorted(all_sprites, key=lambda sprite:
+        sprite.rect.bottom if isinstance(sprite, (Player, Platform, Goal)) else sprite.rect.bottom - 1)
+
+        for sprite in sorted_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
 
         # Flip the display
@@ -186,6 +230,7 @@ def main():
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == '__main__':
     main()
