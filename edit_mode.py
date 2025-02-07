@@ -9,6 +9,9 @@ pygame.init()
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 600
 
+# Zoom factor (0.5 means zoomed out by double)
+ZOOM_FACTOR = 0.5
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -20,7 +23,7 @@ BUTTON_HEIGHT = 50
 
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Edit Mode")
+pygame.display.set_caption("Edit Mode (Zoomed Out)")
 
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
@@ -31,6 +34,7 @@ def load_platforms(filename):
     return platforms_data
 
 def save_platforms(filename, platforms):
+    # Save platforms with their original (unscaled) positions
     platforms_data = [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height} for p in platforms]
     with open(filename, 'w') as file:
         json.dump(platforms_data, file, indent=4)
@@ -55,7 +59,7 @@ def main():
     add_button_image = pygame.image.load('sprites/edit_mode/add_button.png').convert_alpha()
     remove_button_image = pygame.image.load('sprites/edit_mode/remove_button.png').convert_alpha()
 
-    # Button positions
+    # Button positions (not scaled)
     add_button_rect = add_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 10))
     minus_button_rect = remove_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, BUTTON_HEIGHT + 20))
 
@@ -66,19 +70,29 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Scale mouse position to account for zoom
+                scaled_mouse_pos = (event.pos[0] / ZOOM_FACTOR, event.pos[1] / ZOOM_FACTOR)
+
                 if add_button_rect.collidepoint(event.pos):
-                    # Add a new platform
+                    # Add a new platform at a default position (unscaled)
                     new_platform = Platform(100, 100, 200, 20)
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
                 else:
                     for platform in platforms:
-                        if platform.rect.collidepoint(event.pos):
+                        # Check collision with scaled platform rect
+                        scaled_platform_rect = pygame.Rect(
+                            platform.rect.x * ZOOM_FACTOR,
+                            platform.rect.y * ZOOM_FACTOR,
+                            platform.rect.width * ZOOM_FACTOR,
+                            platform.rect.height * ZOOM_FACTOR
+                        )
+                        if scaled_platform_rect.collidepoint(event.pos):
                             selected_platform = platform
-                            offset_x = platform.rect.x - event.pos[0]
-                            offset_y = platform.rect.y - event.pos[1]
+                            offset_x = platform.rect.x - scaled_mouse_pos[0]
+                            offset_y = platform.rect.y - scaled_mouse_pos[1]
                             break
-                # check right click if so rotate
+                # Check right click to rotate
                 if event.button == 3:
                     if selected_platform:
                         selected_platform.rotate()
@@ -91,8 +105,10 @@ def main():
                 selected_platform = None
             elif event.type == pygame.MOUSEMOTION:
                 if selected_platform:
-                    selected_platform.rect.x = event.pos[0] + offset_x
-                    selected_platform.rect.y = event.pos[1] + offset_y
+                    # Scale mouse position for movement
+                    scaled_mouse_pos = (event.pos[0] / ZOOM_FACTOR, event.pos[1] / ZOOM_FACTOR)
+                    selected_platform.rect.x = scaled_mouse_pos[0] + offset_x
+                    selected_platform.rect.y = scaled_mouse_pos[1] + offset_y
             elif event.type == pygame.KEYDOWN:
                 if selected_platform:
                     if event.key == pygame.K_w:
@@ -106,15 +122,31 @@ def main():
 
         # Draw everything
         screen.fill(WHITE)
-        all_sprites.draw(screen)
 
-        # Draw buttons
+        # Draw platforms with scaling
+        for sprite in all_sprites:
+            scaled_rect = pygame.Rect(
+                sprite.rect.x * ZOOM_FACTOR,
+                sprite.rect.y * ZOOM_FACTOR,
+                sprite.rect.width * ZOOM_FACTOR,
+                sprite.rect.height * ZOOM_FACTOR
+            )
+            scaled_image = pygame.transform.scale(sprite.image, (scaled_rect.width, scaled_rect.height))
+            screen.blit(scaled_image, scaled_rect.topleft)
+
+        # Draw buttons (not scaled)
         screen.blit(add_button_image, add_button_rect.topleft)
         screen.blit(remove_button_image, minus_button_rect.topleft)
 
         # Highlight selected platform
         if selected_platform:
-            pygame.draw.rect(screen, RED, selected_platform.rect, 2)
+            scaled_selected_rect = pygame.Rect(
+                selected_platform.rect.x * ZOOM_FACTOR,
+                selected_platform.rect.y * ZOOM_FACTOR,
+                selected_platform.rect.width * ZOOM_FACTOR,
+                selected_platform.rect.height * ZOOM_FACTOR
+            )
+            pygame.draw.rect(screen, RED, scaled_selected_rect, 2)
 
         # Flip the display
         pygame.display.flip()

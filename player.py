@@ -82,9 +82,9 @@ class Player(pygame.sprite.Sprite):
         else:
             self.change_y += GRAVITY
 
-        if self.rect.y >= 600 - PLAYER_HEIGHT and self.change_y >= 0:
+        if self.rect.y >= 1200 - PLAYER_HEIGHT and self.change_y >= 0:
             self.change_y = 0
-            self.rect.y = 600 - PLAYER_HEIGHT
+            self.rect.y = 1200 - PLAYER_HEIGHT
             self.on_ground = True
 
     def jump(self):

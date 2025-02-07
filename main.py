@@ -23,6 +23,20 @@ pygame.display.set_caption("Platformer")
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
 
+class Camera:
+    def __init__(self, width, height):
+        self.camera = pygame.Rect(0, 0, width, height)
+        self.width = width
+        self.height = height
+
+    def apply(self, entity):
+        return entity.rect.move(self.camera.topleft)
+
+    def update(self, target):
+        x = -target.rect.x + int(SCREEN_WIDTH / 2)
+        y = -target.rect.y + int(SCREEN_HEIGHT / 2)
+        self.camera = pygame.Rect(x, y, self.width, self.height)
+
 def draw_gradient(screen, start_color, end_color):
     """Draw a vertical gradient from start_color to end_color."""
     for y in range(SCREEN_HEIGHT):
@@ -62,6 +76,9 @@ def main():
         platforms.add(platform)
         all_sprites.add(platform)
 
+    # Initialize camera
+    camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+
     # Main game loop
     running = True
     while running:
@@ -84,10 +101,14 @@ def main():
         # Update sprites
         all_sprites.update()
 
+        # Update camera
+        camera.update(player)
+
         # Draw everything
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
-        all_sprites.draw(screen)
+        for sprite in all_sprites:
+            screen.blit(sprite.image, camera.apply(sprite))
 
         # Flip the display
         pygame.display.flip()
