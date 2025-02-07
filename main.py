@@ -8,6 +8,7 @@ from camera import Camera
 from game_objects.platform import Platform
 from game_objects.goal import Goal
 from game_objects.decoration import Decoration
+from game_objects.spawn_point import SpawnPoint
 
 # Initialize Pygame
 pygame.init()
@@ -61,6 +62,7 @@ def load_level(filename):
         return {
             'platforms': [],
             'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50},
+            'spawn_point': {'x': 0, 'y': 0, 'width': 50, 'height': 50},
             'decorations': []
         }
 
@@ -75,10 +77,10 @@ def increment_room(room_name):
     return room_name  # Fallback if the room name doesn't match the pattern
 
 
-def reset_player_and_camera(player, camera):
+def reset_player_and_camera(player, camera, spawn_point):
     """Reset the player and camera to the starting position."""
-    player.rect.x = SCREEN_WIDTH // 2
-    player.rect.y = SCREEN_HEIGHT // 2
+    player.rect.x = spawn_point.rect.x
+    player.rect.y = spawn_point.rect.y
     camera.camera.x = 0
     camera.camera.y = 0
 
@@ -127,8 +129,18 @@ def next_level(player, camera, all_sprites, platforms):
     )
     all_sprites.add(new_goal)
 
+    # Load new spawn point
+    spawn_point_data = level_data['spawn_point']
+    spawn_point = SpawnPoint(
+        spawn_point_data['x'],
+        spawn_point_data['y'],
+        spawn_point_data['width'],
+        spawn_point_data['height']
+    )
+    all_sprites.add(spawn_point)
+
     # Reset player position
-    reset_player_and_camera(player, camera)
+    reset_player_and_camera(player, camera, spawn_point)
 
     return new_goal  # Return the new goal object
 
@@ -146,12 +158,6 @@ def main():
     background_rect = background.get_rect()
     background_rect.bottom = SCREEN_HEIGHT
 
-    # Create player
-    player = Player()
-    player.rect.x = SCREEN_WIDTH // 2
-    player.rect.y = SCREEN_HEIGHT // 2
-    player.set_platforms(platforms)
-    all_sprites.add(player)
 
     # Load level data from JSON file
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
@@ -176,6 +182,18 @@ def main():
     goal_data = level_data['goal']
     goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
     all_sprites.add(goal)
+
+    # Load spawn_point
+    spawn_point_data = level_data['spawn_point']
+    spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'], spawn_point_data['height'])
+    all_sprites.add(spawn_point)
+
+    # Create player
+    player = Player()
+    player.rect.x = spawn_point.rect.x
+    player.rect.y = spawn_point.rect.y
+    player.set_platforms(platforms)
+    all_sprites.add(player)
 
     # Initialize camera
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -217,7 +235,7 @@ def main():
         # Sort sprites by y position for proper layering
         # Player and platforms are drawn on top of decorations
         sorted_sprites = sorted(all_sprites, key=lambda sprite:
-        sprite.rect.bottom if isinstance(sprite, (Player, Platform, Goal)) else sprite.rect.bottom - 1)
+        sprite.rect.bottom if isinstance(sprite, (Player, Platform, Goal, SpawnPoint)) else sprite.rect.bottom - 1)
 
         for sprite in sorted_sprites:
             screen.blit(sprite.image, camera.apply(sprite))

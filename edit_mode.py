@@ -3,6 +3,7 @@ import json
 import os
 from game_objects.platform import Platform
 from game_objects.goal import Goal
+from game_objects.spawn_point import SpawnPoint
 from game_objects.decoration import Decoration
 
 # Initialize Pygame
@@ -61,16 +62,18 @@ def load_level(filename):
         return {
             'platforms': [],
             'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50},
+            'spawn_point': {'x': 50, 'y': 50, 'width': 50, 'height': 50},
             'decorations': []
         }
 
 
-def save_level(filename, platforms, goal, decorations):
+def save_level(filename, platforms, goal, spawn_point, decorations):
     """Save level data to a JSON file."""
     level_data = {
         'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height}
                       for p in platforms],
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
+        'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
         'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y}
                         for d in decorations]
     }
@@ -101,6 +104,11 @@ def main():
     goal_data = level_data['goal']
     goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
     all_sprites.add(goal)
+
+    # Load spawn point
+    spawn_point_data = level_data['spawn_point']
+    spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'], spawn_point_data['height'])
+    all_sprites.add(spawn_point)
 
     # Load decorations
     for decoration_data in level_data.get('decorations', []):
@@ -166,7 +174,7 @@ def main():
                     all_sprites.add(new_platform)
                 elif prev_button_rect.collidepoint(event.pos) or next_button_rect.collidepoint(event.pos):
                     # Save current room before switching
-                    save_level(ROOMS[current_room_index], platforms, goal, decorations)
+                    save_level(ROOMS[current_room_index], platforms, goal,spawn_point, decorations)
 
                     # Update room index
                     if prev_button_rect.collidepoint(event.pos):
@@ -202,6 +210,16 @@ def main():
                         goal_data['height']
                     )
                     all_sprites.add(goal)
+
+                    # Load spawn point
+                    spawn_point_data = level_data['spawn_point']
+                    spawn_point = SpawnPoint(
+                        spawn_point_data['x'],
+                        spawn_point_data['y'],
+                        spawn_point_data['width'],
+                        spawn_point_data['height']
+                    )
+                    all_sprites.add(spawn_point)
 
                     # Load decorations
                     for decoration_data in level_data.get('decorations', []):
@@ -303,7 +321,7 @@ def main():
         clock.tick(60)
 
     # Save final state before quitting
-    save_level(ROOMS[current_room_index], platforms, goal, decorations)
+    save_level(ROOMS[current_room_index], platforms, goal,spawn_point, decorations)
 
     pygame.quit()
 

@@ -37,6 +37,12 @@
         "width": 50,
         "height": 50
     },
+    "spawn_point": {
+        "x": 1578,
+        "y": 788,
+        "width": 20,
+        "height": 20
+    },
     "decorations": [
         {
             "type": "tree",
