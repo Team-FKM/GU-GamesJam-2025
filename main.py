@@ -20,6 +20,7 @@ pygame.init()
 
 # initialize audio manager
 audio_manager = AudioManager()
+audio_manager.load_sound('walk', 'audio/sounds/walking.wav')
 
 # Screen dimensions (scaled up)
 SCREEN_WIDTH = 1300
@@ -178,10 +179,13 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     player.go_left()
+                    audio_manager.play_sound('walk')
                 elif event.key == pygame.K_d:
                     player.go_right()
+                    audio_manager.play_sound('walk')
                 elif event.key == pygame.K_w:
                     player.jump()
+                    audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_RETURN:
                     goal, all_sprites, platforms, spawn_point, targets = switch_game_state(player, camera, all_sprites, platforms)
                     player.set_platforms(platforms)
@@ -227,6 +231,7 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     player.stop()
+                    audio_manager.stop_sound('walk')
 
         # Check for collisions between projectiles and targets
         for projectile in projectiles:
