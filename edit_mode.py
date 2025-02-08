@@ -178,8 +178,8 @@ def main():
         topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 4 * BUTTON_HEIGHT + 50)
     )
 
-    # Font for displaying current decoration
-    font = pygame.font.Font(None, 24)
+    # Font for displaying current decoration and z-index
+    font = pygame.font.Font(None, 24)  # Default font, size 24
 
     running = True
     while running:
@@ -297,6 +297,12 @@ def main():
         for sprite in sorted_sprites:
             scaled_rect, scaled_image = draw_sprite(sprite)
             screen.blit(scaled_image, scaled_rect.topleft)
+
+            # Display z-index for decorations
+            if isinstance(sprite, Decoration):
+                z_index_text = font.render(f"z: {sprite.z_index}", True, BLACK)
+                text_position = (scaled_rect.x, scaled_rect.y - 20)  # Position text above the decoration
+                screen.blit(z_index_text, text_position)
 
         # Draw all buttons (not scaled)
         screen.blit(add_button_image, add_button_rect.topleft)

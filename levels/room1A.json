@@ -36,121 +36,44 @@
             "breakable": true
         },
         {
-            "x": 406,
-            "y": 1050,
-            "width": 510,
+            "x": 408,
+            "y": 1068,
+            "width": 860,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 896,
-            "y": 1050,
-            "width": 20,
-            "height": 200,
-            "breakable": false
-        },
-        {
-            "x": 196,
-            "y": 800,
-            "width": 400,
+            "x": 398,
+            "y": 812,
+            "width": 870,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 576,
-            "y": 274,
-            "width": 20,
-            "height": 530,
-            "breakable": false
-        },
-        {
-            "x": 590,
-            "y": 968,
-            "width": 110,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 596,
-            "y": 802,
-            "width": 330,
-            "height": 20,
-            "breakable": true
-        },
-        {
-            "x": 722,
-            "y": 926,
-            "width": 110,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 798,
-            "y": 860,
-            "width": 120,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 912,
-            "y": 1180,
-            "width": 400,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 916,
-            "y": 570,
-            "width": 20,
-            "height": 400,
-            "breakable": false
-        },
-        {
-            "x": 736,
-            "y": 550,
+            "x": 314,
+            "y": 1128,
             "width": 200,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 916,
-            "y": 476,
-            "width": 20,
-            "height": 80,
-            "breakable": false
-        },
-        {
-            "x": 932,
-            "y": 476,
-            "width": 500,
+            "x": 824,
+            "y": 984,
+            "width": 200,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 1412,
-            "y": 476,
-            "width": 20,
-            "height": 190,
-            "breakable": false
-        },
-        {
-            "x": 722,
-            "y": 466,
-            "width": 20,
-            "height": 200,
-            "breakable": false
-        },
-        {
-            "x": 990,
-            "y": 1108,
-            "width": 20,
-            "height": 200,
+            "x": 1234,
+            "y": 1010,
+            "width": 200,
+            "height": 20,
             "breakable": false
         }
     ],
     "goal": {
-        "x": 1562,
-        "y": 888,
+        "x": 1358,
+        "y": 934,
         "width": 50,
         "height": 50
     },
@@ -162,54 +85,72 @@
     },
     "decorations": [
         {
+            "type": "black_arch",
+            "x": 468,
+            "y": 832,
+            "z_index": 10
+        },
+        {
+            "type": "black_arch",
+            "x": 702,
+            "y": 832,
+            "z_index": 10
+        },
+        {
+            "type": "black_arch",
+            "x": 936,
+            "y": 830,
+            "z_index": 10
+        },
+        {
+            "type": "bush",
+            "x": 520,
+            "y": 1022,
+            "z_index": -10
+        },
+        {
+            "type": "bush",
+            "x": 636,
+            "y": 1022,
+            "z_index": -10
+        },
+        {
             "type": "black_fill",
-            "x": 418,
-            "y": 1062,
+            "x": 416,
+            "y": 1082,
             "z_index": 0
         },
         {
             "type": "black_fill",
-            "x": -282,
-            "y": 504,
-            "z_index": 0
-        },
-        {
-            "type": "black_fill",
-            "x": 98,
-            "y": 322,
-            "z_index": 0
-        },
-        {
-            "type": "black_fill",
-            "x": 934,
-            "y": 490,
+            "x": 892,
+            "y": 1080,
             "z_index": 0
         }
     ],
     "targets": [
         {
-            "x": 252,
-            "y": 1102
+            "x": 2524,
+            "y": 172
         },
         {
-            "x": 706,
-            "y": 754
+            "x": 2492,
+            "y": 174
         },
         {
-            "x": 596,
-            "y": 698
+            "x": 2526,
+            "y": 188
         },
         {
-            "x": 674,
-            "y": 614
+            "x": 2460,
+            "y": 196
         },
         {
-            "x": 596,
-            "y": 536
+            "x": 2510,
+            "y": 178
         },
         {
-            "x": 674,
-            "y": 466
+            "x": 2512,
+            "y": 280
         }
     ]
 }

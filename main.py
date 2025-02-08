@@ -246,6 +246,14 @@ def main():
         sorted_sprites = sorted(all_sprites.sprites() + projectiles.sprites(), key=lambda sprite: getattr(sprite, 'z_index', 0))
 
         for sprite in sorted_sprites:
+            if isinstance(sprite, Decoration):
+                # Apply parallax effect based on z_index
+                if sprite.z_index >= 10:
+                    parallax_factor = -0.5  # Foreground moves
+                    sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
+                elif sprite.z_index <= -10:
+                    parallax_factor = 0.5  # Background moves faster
+                    sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
             screen.blit(sprite.image, camera.apply(sprite))
         pygame.display.flip()
         clock.tick(60)
