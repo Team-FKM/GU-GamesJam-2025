@@ -166,6 +166,17 @@ def main():
                     goal, all_sprites, platforms, spawn_point = switch_game_state(player, camera, all_sprites, platforms)
                     player.set_platforms(platforms)
                     print(f"Moving to {CURRENT_ROOM}")
+                elif event.key == pygame.K_r:
+                    reset_player_and_camera(player, camera, spawn_point)
+                    print(f"Resting {CURRENT_ROOM}")
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_RSHIFT:
+                    player.attack()
+            elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
+                player.attacking = False
+                player.set_player_image('sprites/player/player.png')  # Reset to idle sprite
+
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     player.stop()

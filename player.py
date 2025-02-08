@@ -22,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.change_x = 0
         self.change_y = 0
         self.on_ground = False
+        self.attacking = False
         self.acceleration = 0
 
     def update(self):
@@ -51,7 +52,7 @@ class Player(pygame.sprite.Sprite):
 
         if not self.on_ground:
             self.set_player_image('sprites/player/player_fall.png')
-        elif self.change_x == 0 and self.acceleration == 0:
+        elif self.change_x == 0 and self.acceleration == 0 and not self.attacking:
             self.set_player_image('sprites/player/player.png')
 
         # Apply acceleration
@@ -91,6 +92,11 @@ class Player(pygame.sprite.Sprite):
         if self.on_ground:
             self.change_y = -JUMP_STRENGTH
             self.on_ground = False
+
+    def attack(self):
+        self.attacking = True
+        self.set_player_image('sprites/player/player_attack.png')
+        pygame.time.set_timer(pygame.USEREVENT + 1, 100)  # Custom event for ending attack animation
 
     def go_left(self):
         self.acceleration = -ACCELERATION
