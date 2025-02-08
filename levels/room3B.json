@@ -4,13 +4,15 @@
             "x": 1050,
             "y": 1136,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": false
         },
         {
             "x": 1128,
             "y": 1138,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         }
     ],
     "goal": {

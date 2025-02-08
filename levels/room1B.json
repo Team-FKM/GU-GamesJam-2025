@@ -4,19 +4,22 @@
             "x": 674,
             "y": 1060,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 1034,
             "y": 1060,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": true
         },
         {
             "x": 966,
             "y": 1060,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         }
     ],
     "goal": {

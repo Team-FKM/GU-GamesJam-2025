@@ -117,7 +117,7 @@ def load_room(level_data):
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
     for platform_data in level_data['platforms']:
-        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'], platform_data.get('breakable', False))
         platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
@@ -171,8 +171,18 @@ def main():
                     print(f"Resting {CURRENT_ROOM}")
                 elif event.key == pygame.K_ESCAPE:
                     running = False
-                elif event.key == pygame.K_RSHIFT:
+                elif event.key == pygame.K_HASH:
                     player.attack()
+                    # check if player is colliding with breakable platform if so break it
+                    attack_rect = player.rect.inflate(20,10)  # Expand collision area by 20 pixels width, 10 pixels height
+                    for platform in platforms:
+                        if attack_rect.colliderect(platform.rect):
+                            if platform.broken():
+                                platforms.remove(platform)
+                                all_sprites.remove(platform)
+                                player.set_platforms(platforms)
+
+
             elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
                 player.attacking = False
                 player.set_player_image('sprites/player/player.png')  # Reset to idle sprite

@@ -19,6 +19,7 @@ ZOOM_FACTOR = 0.5
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREY = (100, 100, 100)
 RED = (255, 0, 0)
 
 # Button dimensions
@@ -73,7 +74,7 @@ def load_sprites(level_data):
 
     # Load platforms
     for platform_data in level_data['platforms']:
-        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'], platform_data['breakable'])
         platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
@@ -118,7 +119,7 @@ def draw_sprite(sprite):
 def save_level(filename, platforms, goal, spawn_point, decorations):
     """Save level data to a JSON file."""
     level_data = {
-        'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height}
+        'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height, 'breakable': p.breakable}
                       for p in platforms],
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
         'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
@@ -256,10 +257,16 @@ def main():
                         selected_object.rect.width += 10
                     elif event.key == pygame.K_s:
                         selected_object.rect.width = max(10, selected_object.rect.width - 10)
+                    elif event.key == pygame.K_b:
+                        selected_object.breakable = not selected_object.breakable
                     # Update the platform's image to reflect the new width
                     selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
                     selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
-                    selected_object.image.fill(BLACK)
+                    if selected_object.breakable:
+                        selected_object.image.fill(GREY)
+                    else:
+                        selected_object.image.fill(BLACK)
+
                 elif selected_object and isinstance(selected_object, Decoration):
                     if event.key == pygame.K_UP:
                         selected_object.z_index += 1

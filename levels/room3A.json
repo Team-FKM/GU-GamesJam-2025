@@ -4,31 +4,36 @@
             "x": 424,
             "y": 650,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": false
         },
         {
             "x": 652,
             "y": 756,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": false
         },
         {
             "x": 448,
             "y": 836,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 658,
             "y": 940,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 1018,
             "y": 938,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         }
     ],
     "goal": {

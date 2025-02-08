@@ -1,40 +1,46 @@
 {
     "platforms": [
         {
-            "x": 604,
-            "y": 1132,
+            "x": 706,
+            "y": 1036,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": true
         },
         {
             "x": 524,
             "y": 1112,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 1010,
             "y": 1110,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 1310,
             "y": 1114,
             "width": 200,
-            "height": 20
+            "height": 20,
+            "breakable": false
         },
         {
             "x": 856,
             "y": 1010,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": true
         },
         {
             "x": 856,
             "y": 814,
             "width": 20,
-            "height": 200
+            "height": 200,
+            "breakable": false
         }
     ],
     "goal": {
