@@ -1,3 +1,4 @@
+# main.py
 import pygame
 import sys
 import json
@@ -139,10 +140,8 @@ def load_room(level_data):
     for target_data in level_data.get('targets', []):
         target = Target(target_data['x'], target_data['y'])
         target.z_index = 0
-        print('adding target, :', target)
         targets.add(target)
         all_sprites.add(target)
-    print(targets)
 
     goal = Goal(**level_data['goal'])
     goal.z_index = 0
@@ -215,7 +214,6 @@ def main():
                                         if isinstance(sprite, Projectile):
                                             sprite.set_platforms(platforms)
 
-
             elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
                 player.attacking = False
                 player.set_player_image('sprites/player/player.png')  # Reset to idle sprite
@@ -223,11 +221,25 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     player.stop()
+
+
+
+        # Check for collisions between projectiles and targets
+        for projectile in all_sprites:
+            if isinstance(projectile, Projectile):
+                new_platform = projectile.update()
+                if new_platform:
+                    platforms.add(new_platform)
+                    all_sprites.add(new_platform)
+
+        # Update all sprites
         all_sprites.update()
+
         if pygame.sprite.collide_rect(player, goal):
             goal, all_sprites, platforms, spawn_point = next_level(player, camera, all_sprites, platforms)
             player.set_platforms(platforms)
             print(f"Moving to {CURRENT_ROOM}")
+
         camera.update(player)
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)

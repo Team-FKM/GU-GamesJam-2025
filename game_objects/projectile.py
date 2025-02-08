@@ -27,9 +27,10 @@ class Projectile(pygame.sprite.Sprite):
         # Check for collisions with targets
         for target in self.targets:
             if self.rect.colliderect(target.rect):
-                target.destroy()
+                new_platform = target.turn_into_platform()
                 self.destroy()
-                break
+                return new_platform
+        return None
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

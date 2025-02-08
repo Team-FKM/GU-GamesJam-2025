@@ -1,4 +1,5 @@
 import pygame
+from game_objects.platform import Platform
 
 class Target (pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -19,3 +20,7 @@ class Target (pygame.sprite.Sprite):
 
     def destroy(self):
         self.kill()
+
+    def turn_into_platform(self):
+        self.destroy()
+        return Platform(self.rect.x, self.rect.y, self.width, self.height)
