@@ -74,7 +74,7 @@ def save_level(filename, platforms, goal, spawn_point, decorations):
                       for p in platforms],
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
         'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
-        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y}
+        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
                         for d in decorations]
     }
     with open(filename, 'w') as file:
@@ -115,7 +115,8 @@ def main():
         decoration = Decoration(
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
-            decoration_data['y']
+            decoration_data['y'],
+            decoration_data['z_index']
         )
         decoration.decoration_type = decoration_data['type']
         decorations.add(decoration)
@@ -226,7 +227,8 @@ def main():
                         decoration = Decoration(
                             DECORATION_TYPES[decoration_data['type']],
                             decoration_data['x'],
-                            decoration_data['y']
+                            decoration_data['y'],
+                            decoration_data['z_index']
                         )
                         decoration.decoration_type = decoration_data['type']
                         decorations.add(decoration)
@@ -275,12 +277,20 @@ def main():
                     selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
                     selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
                     selected_object.image.fill(BLACK)
+                elif selected_object and isinstance(selected_object, Decoration):
+                    if event.key == pygame.K_UP:
+                        selected_object.z_index += 1
+                    elif event.key == pygame.K_DOWN:
+                        selected_object.z_index -= 1
 
         # Draw everything
         screen.fill(WHITE)
 
-        # Draw objects with scaling
-        for sprite in all_sprites:
+        # Sort decorations by z-index
+        sorted_decorations = sorted(decorations.sprites(), key=lambda x: x.z_index)
+
+        # Draw platforms and other objects
+        for sprite in platforms:
             scaled_rect = pygame.Rect(
                 sprite.rect.x * ZOOM_FACTOR,
                 sprite.rect.y * ZOOM_FACTOR,
@@ -288,6 +298,17 @@ def main():
                 sprite.rect.height * ZOOM_FACTOR
             )
             scaled_image = pygame.transform.scale(sprite.image, (scaled_rect.width, scaled_rect.height))
+            screen.blit(scaled_image, scaled_rect.topleft)
+
+        # Draw decorations in sorted order
+        for decoration in sorted_decorations:
+            scaled_rect = pygame.Rect(
+                decoration.rect.x * ZOOM_FACTOR,
+                decoration.rect.y * ZOOM_FACTOR,
+                decoration.rect.width * ZOOM_FACTOR,
+                decoration.rect.height * ZOOM_FACTOR
+            )
+            scaled_image = pygame.transform.scale(decoration.image, (scaled_rect.width, scaled_rect.height))
             screen.blit(scaled_image, scaled_rect.topleft)
 
         # Draw all buttons (not scaled)

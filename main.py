@@ -2,7 +2,7 @@ import pygame
 import sys
 import json
 import os
-import re  # For parsing room numbers
+import re
 from player import Player
 from camera import Camera
 from game_objects.platform import Platform
@@ -23,7 +23,7 @@ START_COLOR = (0, 128, 255)
 END_COLOR = (255, 255, 255)
 
 # Initialize current room
-CURRENT_ROOM = 'room1A'  # Start with room1A
+CURRENT_ROOM = 'room1A'
 
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -39,7 +39,6 @@ DECORATION_TYPES = {
     if name.endswith('.png')
 }
 
-
 def draw_gradient(screen, start_color, end_color):
     """Draw a vertical gradient from start_color to end_color."""
     for y in range(SCREEN_HEIGHT):
@@ -49,13 +48,12 @@ def draw_gradient(screen, start_color, end_color):
         ]
         pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))
 
-
 def load_level(filename):
     """Load level data from a JSON file."""
     try:
         with open(filename, 'r') as file:
             level_data = json.load(file)
-            if 'decorations' not in level_data:  # Add support for older files
+            if 'decorations' not in level_data:
                 level_data['decorations'] = []
         return level_data
     except FileNotFoundError:
@@ -66,7 +64,6 @@ def load_level(filename):
             'decorations': []
         }
 
-
 def increment_room(room_name):
     """Increment the room number (e.g., room1A → room2A)."""
     match = re.match(r'room(\d+)([A-Za-z])', room_name)
@@ -74,8 +71,7 @@ def increment_room(room_name):
         room_number = int(match.group(1))
         room_letter = match.group(2)
         return f'room{room_number + 1}{room_letter}'
-    return room_name  # Fallback if the room name doesn't match the pattern
-
+    return room_name
 
 def reset_player_and_camera(player, camera, spawn_point):
     """Reset the player and camera to the starting position."""
@@ -83,7 +79,6 @@ def reset_player_and_camera(player, camera, spawn_point):
     player.rect.y = spawn_point.rect.y
     camera.camera.x = 0
     camera.camera.y = 0
-
 
 def next_level(player, camera, all_sprites, platforms):
     """Move to the next level."""
@@ -93,12 +88,11 @@ def next_level(player, camera, all_sprites, platforms):
     # Load new level data
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
 
-    # Clear existing platforms, decorations, and goal
-    for sprite in all_sprites:
-        if isinstance(sprite, (Platform, Goal, Decoration)):
-            sprite.kill()
+    # Clear existing sprites
+    all_sprites.empty()
+    platforms.empty()
 
-    # Load new platforms
+    # Load new platforms (z_index = 0)
     for platform_data in level_data['platforms']:
         platform = Platform(
             platform_data['x'],
@@ -106,20 +100,23 @@ def next_level(player, camera, all_sprites, platforms):
             platform_data['width'],
             platform_data['height']
         )
+        platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
 
-    # Load new decorations
+    # Load new decorations with their z_index
     for decoration_data in level_data.get('decorations', []):
         decoration = Decoration(
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
-            decoration_data['y']
+            decoration_data['y'],
+            decoration_data.get('z_index', 0)  # Default to 0 if not specified
         )
         decoration.decoration_type = decoration_data['type']
+        decoration.z_index = decoration_data.get('z_index', 0)
         all_sprites.add(decoration)
 
-    # Load new goal
+    # Load new goal (z_index = 0)
     goal_data = level_data['goal']
     new_goal = Goal(
         goal_data['x'],
@@ -127,9 +124,10 @@ def next_level(player, camera, all_sprites, platforms):
         goal_data['width'],
         goal_data['height']
     )
+    new_goal.z_index = 0
     all_sprites.add(new_goal)
 
-    # Load new spawn point
+    # Load new spawn point (z_index = 0)
     spawn_point_data = level_data['spawn_point']
     spawn_point = SpawnPoint(
         spawn_point_data['x'],
@@ -137,16 +135,18 @@ def next_level(player, camera, all_sprites, platforms):
         spawn_point_data['width'],
         spawn_point_data['height']
     )
+    spawn_point.z_index = 0
     all_sprites.add(spawn_point)
 
-    # Reset player position
+    # Reset player position and add back to sprites
     reset_player_and_camera(player, camera, spawn_point)
+    player.z_index = 0
+    all_sprites.add(player)
 
-    return new_goal  # Return the new goal object
-
+    return new_goal
 
 def main():
-    global CURRENT_ROOM  # Use the global CURRENT_ROOM variable
+    global CURRENT_ROOM
 
     # Create sprite groups
     all_sprites = pygame.sprite.Group()
@@ -158,40 +158,44 @@ def main():
     background_rect = background.get_rect()
     background_rect.bottom = SCREEN_HEIGHT
 
-
-    # Load level data from JSON file
+    # Load initial level data
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
 
-    # Load platforms
+    # Load platforms (z_index = 0)
     for platform_data in level_data['platforms']:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+        platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
 
-    # Load decorations
+    # Load decorations with their z_index
     for decoration_data in level_data.get('decorations', []):
         decoration = Decoration(
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
-            decoration_data['y']
+            decoration_data['y'],
+            decoration_data.get('z_index', 0)  # Default to 0 if not specified
         )
         decoration.decoration_type = decoration_data['type']
         all_sprites.add(decoration)
 
-    # Load goal
+    # Load goal (z_index = 0)
     goal_data = level_data['goal']
     goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+    goal.z_index = 0
     all_sprites.add(goal)
 
-    # Load spawn_point
+    # Load spawn_point (z_index = 0)
     spawn_point_data = level_data['spawn_point']
     spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'], spawn_point_data['height'])
+    spawn_point.z_index = 0
     all_sprites.add(spawn_point)
 
-    # Create player
+    # Create player (z_index = 0)
     player = Player()
     player.rect.x = spawn_point.rect.x
     player.rect.y = spawn_point.rect.y
+    player.z_index = 0
     player.set_platforms(platforms)
     all_sprites.add(player)
 
@@ -220,8 +224,8 @@ def main():
         # Update sprites
         all_sprites.update()
 
+        # Check for goal collision
         if pygame.sprite.collide_rect(player, goal):
-            # Load the new level and update the goal reference
             goal = next_level(player, camera, all_sprites, platforms)
             print(f"Moving to {CURRENT_ROOM}")
 
@@ -232,23 +236,18 @@ def main():
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
 
-        # Sort sprites by y position for proper layering
-        # Player and platforms are drawn on top of decorations
-        sorted_sprites = sorted(all_sprites, key=lambda sprite:
-        sprite.rect.bottom if isinstance(sprite, (Player, Platform, Goal, SpawnPoint)) else sprite.rect.bottom - 1)
+        # Sort sprites by z_index for proper layering
+        sorted_sprites = sorted(all_sprites, key=lambda sprite: sprite.z_index)
 
+        # Draw all sprites in order of z_index
         for sprite in sorted_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
 
-        # Flip the display
         pygame.display.flip()
-
-        # Cap the frame rate
         clock.tick(60)
 
     pygame.quit()
     sys.exit()
-
 
 if __name__ == '__main__':
     main()
