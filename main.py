@@ -154,7 +154,7 @@ def load_room(level_data):
 
 def main():
     global CURRENT_ROOM
-    background = pygame.image.load('backgrounds/middle_ground.png').convert_alpha()
+    background = pygame.image.load('backgrounds/glasgow_uni.png').convert_alpha()
     background = pygame.transform.scale(background, (SCREEN_WIDTH, background.get_height()))
     background_rect = background.get_rect()
     background_rect.bottom = SCREEN_HEIGHT
@@ -249,10 +249,10 @@ def main():
             if isinstance(sprite, Decoration):
                 # Apply parallax effect based on z_index
                 if sprite.z_index >= 10:
-                    parallax_factor = -0.5  # Foreground moves
+                    parallax_factor = -0.2  # Foreground moves
                     sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
                 elif sprite.z_index <= -10:
-                    parallax_factor = 0.5  # Background moves faster
+                    parallax_factor = 0.2  # Background moves faster
                     sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
             screen.blit(sprite.image, camera.apply(sprite))
         pygame.display.flip()
