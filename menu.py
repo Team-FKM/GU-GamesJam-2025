@@ -1,5 +1,6 @@
 import pygame
 import sys
+from audio_manager import AudioManager
 
 # Screen dimensions
 SCREEN_WIDTH = 1300
@@ -26,6 +27,20 @@ clock = pygame.time.Clock()
 menu_background = pygame.image.load('backgrounds/menu_bg.png').convert_alpha()
 menu_background = pygame.transform.scale(menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
+# Initialize AudioManager
+audio_manager = AudioManager()
+audio_manager.load_music('audio/music/Monty-Python.mp3')
+audio_manager.play_music()
+
+# Load mute button images
+mute_button_image = pygame.image.load('sprites/menu/mute_button.png').convert_alpha()
+mute_button_selected_image = pygame.image.load('sprites/menu/mute_selected_button.png').convert_alpha()
+mute_button_image = pygame.transform.scale(mute_button_image, (50, 50))
+mute_button_selected_image = pygame.transform.scale(mute_button_selected_image, (50, 50))
+
+# Mute state
+is_muted = False
+
 def draw_text(text, font, color, surface, x, y):
     """Helper function to draw text on the screen."""
     text_obj = font.render(text, True, color)
@@ -37,7 +52,9 @@ def credits_screen():
     while True:
         screen.blit(menu_background, (0, 0))
         draw_text("Credits", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
-        draw_text("Game developed by Fraser Levack & Kai", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        draw_text("Game developed by Fraser Levack & Kai", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        draw_text("Score by @Rosenrot on Newgrounds", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
+        draw_text("Press ESC to return to the main menu", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.2)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -51,6 +68,8 @@ def credits_screen():
 
 def main_menu():
     """Main menu loop."""
+    global is_muted
+
     start_button_image = pygame.image.load('sprites/menu/start_button.png').convert_alpha()
     start_button_selected_image = pygame.image.load('sprites/menu/start_selected_button.png').convert_alpha()
     quit_button_image = pygame.image.load('sprites/menu/quit_button.png').convert_alpha()
@@ -76,6 +95,7 @@ def main_menu():
         start_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 150, 200, 100)
         credits_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 100)
         quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 150, 200, 100)
+        mute_button = pygame.Rect(SCREEN_WIDTH - 60, SCREEN_HEIGHT - 60, 50, 50)
 
         # Change button images on hover
         if start_button.collidepoint(mouse_pos):
@@ -93,6 +113,11 @@ def main_menu():
         else:
             screen.blit(quit_button_image, quit_button.topleft)
 
+        if mute_button.collidepoint(mouse_pos):
+            screen.blit(mute_button_selected_image, mute_button.topleft)
+        else:
+            screen.blit(mute_button_image, mute_button.topleft)
+
         # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -106,6 +131,9 @@ def main_menu():
                 if quit_button.collidepoint(mouse_pos):
                     pygame.quit()
                     sys.exit()
+                if mute_button.collidepoint(mouse_pos):
+                    is_muted = not is_muted
+                    audio_manager.set_music_volume(0 if is_muted else 1)
 
         pygame.display.flip()
         clock.tick(60)

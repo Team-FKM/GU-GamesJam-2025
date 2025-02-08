@@ -13,9 +13,13 @@ from game_objects.spawn_point import SpawnPoint
 from game_objects.projectile import Projectile
 from game_objects.target import Target
 from menu import main_menu  # Import the menu
+from audio_manager import AudioManager
 
 # Initialize Pygame
 pygame.init()
+
+# initialize audio manager
+audio_manager = AudioManager()
 
 # Screen dimensions (scaled up)
 SCREEN_WIDTH = 1300
@@ -263,5 +267,8 @@ def main():
 if __name__ == '__main__':
     # Show the main menu before starting the game
     main_menu()
+    audio_manager.stop_music()
+    audio_manager.load_music('audio/music/Medieval-rock.mp3')
+    audio_manager.play_music(loops=-1)
     # Start the game loop
     main()
