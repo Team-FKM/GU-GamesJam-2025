@@ -22,6 +22,10 @@ pygame.display.set_caption("Platformer Menu")
 # Clock for controlling frame rate
 clock = pygame.time.Clock()
 
+# Load menu background
+menu_background = pygame.image.load('backgrounds/menu_bg.png').convert_alpha()
+menu_background = pygame.transform.scale(menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
 def draw_text(text, font, color, surface, x, y):
     """Helper function to draw text on the screen."""
     text_obj = font.render(text, True, color)
@@ -31,7 +35,7 @@ def draw_text(text, font, color, surface, x, y):
 def credits_screen():
     """Credits screen loop."""
     while True:
-        screen.fill(WHITE)
+        screen.blit(menu_background, (0, 0))
         draw_text("Credits", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
         draw_text("Game developed by Fraser Levack", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
@@ -62,7 +66,7 @@ def main_menu():
     credits_button_selected_image = pygame.transform.scale(credits_button_selected_image, (200, 100))
 
     while True:
-        screen.fill(WHITE)
+        screen.blit(menu_background, (0, 0))
 
         # Draw title
         draw_text("Platformer", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 8)
