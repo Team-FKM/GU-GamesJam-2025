@@ -179,13 +179,18 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     player.go_left()
-                    audio_manager.play_sound('walk')
+                    if player.on_ground:
+                        audio_manager.play_sound('walk')
+                    else:
+                        audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_d:
                     player.go_right()
-                    audio_manager.play_sound('walk')
+                    if player.on_ground:
+                        audio_manager.play_sound('walk')
+                    else:
+                        audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_w:
                     player.jump()
-                    audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_RETURN:
                     goal, all_sprites, platforms, spawn_point, targets = switch_game_state(player, camera, all_sprites, platforms)
                     player.set_platforms(platforms)
