@@ -9,6 +9,7 @@ from game_objects.platform import Platform
 from game_objects.goal import Goal
 from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
+from game_objects.projectile import Projectile
 
 # Initialize Pygame
 pygame.init()
@@ -178,12 +179,28 @@ def main():
                     player.attack()
                     # check if player is colliding with breakable platform if so break it
                     attack_rect = player.rect.inflate(20,10)  # Expand collision area by 20 pixels width, 10 pixels height
-                    for platform in platforms:
-                        if attack_rect.colliderect(platform.rect):
-                            if platform.broken():
-                                platforms.remove(platform)
-                                all_sprites.remove(platform)
-                                player.set_platforms(platforms)
+                    if player.player_state:
+                        if player.last_direction_faced == 'right':
+                            # create a projectile from the player towards the right
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, 1, 10)
+                            projectile.set_platforms(platforms)
+                            all_sprites.add(projectile)
+                        elif player.last_direction_faced == 'left':
+                            # create a projectile from the player towards the left
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, -1, 10)
+                            projectile.set_platforms(platforms)
+                            all_sprites.add(projectile)
+                    else:
+                        for platform in platforms:
+                            if attack_rect.colliderect(platform.rect):
+                                if platform.broken():
+                                    platforms.remove(platform)
+                                    all_sprites.remove(platform)
+                                    player.set_platforms(platforms)
+                                    # set all platforms of projectiles
+                                    for sprite in all_sprites:
+                                        if isinstance(sprite, Projectile):
+                                            sprite.set_platforms(platforms)
 
 
             elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer

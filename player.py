@@ -25,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False
         self.acceleration = 0
         self.player_state = False
+        self.last_direction_faced = 'right'  # Initialize last direction faced
 
     def update(self):
         self.calc_grav()
@@ -105,10 +106,12 @@ class Player(pygame.sprite.Sprite):
     def go_left(self):
         self.acceleration = -ACCELERATION
         self.set_player_image('sprites/player/player_left.png')
+        self.last_direction_faced = 'left'  # Update last direction faced
 
     def go_right(self):
         self.acceleration = ACCELERATION
         self.set_player_image('sprites/player/player_right.png')
+        self.last_direction_faced = 'right'  # Update last direction faced
 
     def stop(self):
         self.acceleration = 0
