@@ -12,6 +12,7 @@ from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
 from game_objects.projectile import Projectile
 from game_objects.target import Target
+from menu import main_menu  # Import the menu
 
 # Initialize Pygame
 pygame.init()
@@ -223,8 +224,6 @@ def main():
                 if event.key in [pygame.K_a, pygame.K_d]:
                     player.stop()
 
-
-
         # Check for collisions between projectiles and targets
         for projectile in projectiles:
             if isinstance(projectile, Projectile):
@@ -254,4 +253,7 @@ def main():
     sys.exit()
 
 if __name__ == '__main__':
+    # Show the main menu before starting the game
+    main_menu()
+    # Start the game loop
     main()
