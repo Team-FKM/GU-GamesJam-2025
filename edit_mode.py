@@ -5,6 +5,7 @@ from game_objects.platform import Platform
 from game_objects.goal import Goal
 from game_objects.spawn_point import SpawnPoint
 from game_objects.decoration import Decoration
+from game_objects.target import Target
 
 # Initialize Pygame
 pygame.init()
@@ -71,6 +72,7 @@ def load_sprites(level_data):
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
     decorations = pygame.sprite.Group()
+    targets = pygame.sprite.Group()
 
     # Load platforms
     for platform_data in level_data['platforms']:
@@ -92,6 +94,13 @@ def load_sprites(level_data):
     spawn_point.z_index = 0
     all_sprites.add(spawn_point)
 
+    # Load targets
+    for target_data in level_data.get('targets', []):
+        target = Target(target_data['x'], target_data['y'])
+        target.z_index = 0
+        all_sprites.add(target)
+        targets.add(target)
+
     # Load decorations
     for decoration_data in level_data.get('decorations', []):
         decoration = Decoration(
@@ -104,7 +113,7 @@ def load_sprites(level_data):
         decorations.add(decoration)
         all_sprites.add(decoration)
 
-    return all_sprites, platforms, goal, spawn_point, decorations
+    return all_sprites, platforms, goal, spawn_point, decorations, targets
 
 def draw_sprite(sprite):
     scaled_rect = pygame.Rect(
@@ -116,7 +125,7 @@ def draw_sprite(sprite):
     scaled_image = pygame.transform.scale(sprite.image, (scaled_rect.width, scaled_rect.height))
     return scaled_rect, scaled_image
 
-def save_level(filename, platforms, goal, spawn_point, decorations):
+def save_level(filename, platforms, goal, spawn_point, decorations, targets):
     """Save level data to a JSON file."""
     level_data = {
         'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height, 'breakable': p.breakable}
@@ -124,17 +133,13 @@ def save_level(filename, platforms, goal, spawn_point, decorations):
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
         'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
         'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
-                        for d in decorations]
+                        for d in decorations],
+        'targets': [{'x': t.rect.x, 'y': t.rect.y} for t in targets]
     }
     with open(filename, 'w') as file:
         json.dump(level_data, file, indent=4)
 
 def main():
-    # Create sprite groups
-    all_sprites = pygame.sprite.Group()
-    platforms = pygame.sprite.Group()
-    decorations = pygame.sprite.Group()
-
     # Current room index
     current_room_index = 0
     current_decoration_type = list(DECORATION_TYPES.keys())[0]  # Start with first decoration
@@ -143,7 +148,7 @@ def main():
     level_data = load_level(ROOMS[current_room_index])
 
     # Load sprites off of data
-    all_sprites, platforms, goal, spawn_point, decorations = load_sprites(level_data)
+    all_sprites, platforms, goal, spawn_point, decorations, targets = load_sprites(level_data)
 
     selected_object = None
     offset_x = 0
@@ -156,6 +161,7 @@ def main():
     next_button_image = pygame.image.load('sprites/edit_mode/next_button.png').convert_alpha()
     decoration_cycle_image = pygame.image.load('sprites/edit_mode/cycle_button.png').convert_alpha()
     add_decoration_image = pygame.image.load('sprites/edit_mode/add_decoration_button.png').convert_alpha()
+    add_target_image = pygame.image.load('sprites/edit_mode/add_target_button.png').convert_alpha()
 
     # Button positions (not scaled)
     add_button_rect = add_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 10))
@@ -167,6 +173,9 @@ def main():
     )
     add_decoration_rect = add_decoration_image.get_rect(
         topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 3 * BUTTON_HEIGHT + 40)
+    )
+    add_target_rect = add_target_image.get_rect(
+        topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 4 * BUTTON_HEIGHT + 50)
     )
 
     # Font for displaying current decoration
@@ -196,9 +205,14 @@ def main():
                     new_platform = Platform(100, 100, 200, 20)
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
+                elif add_target_rect.collidepoint(event.pos):
+                    # Add a new target at a default position (unscaled)
+                    new_target = Target(100, 100)
+                    targets.add(new_target)
+                    all_sprites.add(new_target)
                 elif prev_button_rect.collidepoint(event.pos) or next_button_rect.collidepoint(event.pos):
                     # Save current room before switching
-                    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations)
+                    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations, targets)
 
                     # Update room index
                     if prev_button_rect.collidepoint(event.pos):
@@ -215,7 +229,7 @@ def main():
                     all_sprites.empty()
 
                     # Load new sprites
-                    all_sprites, platforms, goal, spawn_point, decorations = load_sprites(level_data)
+                    all_sprites, platforms, goal, spawn_point, decorations, targets = load_sprites(level_data)
 
                 else:
                     for obj in all_sprites:
@@ -291,6 +305,7 @@ def main():
         screen.blit(next_button_image, next_button_rect.topleft)
         screen.blit(decoration_cycle_image, decoration_cycle_rect.topleft)
         screen.blit(add_decoration_image, add_decoration_rect.topleft)
+        screen.blit(add_target_image, add_target_rect.topleft)
 
         # Display current decoration type
         decoration_text = font.render(f"Current: {current_decoration_type}", True, BLACK)
@@ -315,7 +330,7 @@ def main():
         clock.tick(60)
 
     # Save final state before quitting
-    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations)
+    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations, targets)
 
     pygame.quit()
 

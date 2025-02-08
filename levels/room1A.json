@@ -1,66 +1,60 @@
 {
     "platforms": [
         {
-            "x": 706,
-            "y": 1036,
+            "x": 320,
+            "y": 1138,
+            "width": 410,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 302,
+            "y": 958,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 718,
+            "y": 958,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 302,
+            "y": 942,
+            "width": 200,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 500,
+            "y": 940,
             "width": 20,
             "height": 200,
             "breakable": true
-        },
-        {
-            "x": 524,
-            "y": 1112,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 1010,
-            "y": 1110,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 1310,
-            "y": 1114,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 856,
-            "y": 1010,
-            "width": 20,
-            "height": 200,
-            "breakable": true
-        },
-        {
-            "x": 856,
-            "y": 814,
-            "width": 20,
-            "height": 200,
-            "breakable": false
         }
     ],
     "goal": {
-        "x": 1420,
-        "y": 1040,
+        "x": 722,
+        "y": 880,
         "width": 50,
         "height": 50
     },
     "spawn_point": {
-        "x": 592,
-        "y": 926,
+        "x": 356,
+        "y": 1062,
         "width": 20,
         "height": 20
     },
     "decorations": [
         {
-            "type": "tree",
-            "x": 138,
-            "y": 720,
-            "z_index": -2
+            "type": "bush",
+            "x": 982,
+            "y": 968,
+            "z_index": 0
         }
-    ]
+    ],
+    "targets": []
 }

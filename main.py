@@ -10,11 +10,12 @@ from game_objects.goal import Goal
 from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
 from game_objects.projectile import Projectile
+from game_objects.target import Target
 
 # Initialize Pygame
 pygame.init()
 
-# Screen dimensions
+# Screen dimensions (scaled up)
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 600
 
@@ -60,7 +61,8 @@ def load_level(filename):
             'platforms': [],
             'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50},
             'spawn_point': {'x': 0, 'y': 0, 'width': 50, 'height': 50},
-            'decorations': []
+            'decorations': [],
+            'targets': []
         }
 
 def increment_room(room_name):
@@ -95,15 +97,14 @@ def switch_game_state(player, camera, all_sprites, platforms):
     player_position = (player.rect.x, player.rect.y)
     all_sprites.empty()
     platforms.empty()
-    all_sprites, platforms, new_goal, spawn_point = load_room(level_data)
+    all_sprites, platforms, new_goal, spawn_point, targets = load_room(level_data)
     reset_player_and_camera(player, camera, spawn_point, player_position)
     player.set_platforms(platforms)
     player.z_index = 0
     # switching player state
     player.switch_player_state()
-    print(player.player_state)
     all_sprites.add(player)
-    return new_goal, all_sprites, platforms, spawn_point
+    return new_goal, all_sprites, platforms, spawn_point, targets
 
 def next_level(player, camera, all_sprites, platforms):
     global CURRENT_ROOM
@@ -111,7 +112,7 @@ def next_level(player, camera, all_sprites, platforms):
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
     all_sprites.empty()
     platforms.empty()
-    all_sprites, platforms, new_goal, spawn_point = load_room(level_data)
+    all_sprites, platforms, new_goal, spawn_point, targets = load_room(level_data)
     reset_player_and_camera(player, camera, spawn_point)
     player.z_index = 0
     all_sprites.add(player)
@@ -120,6 +121,8 @@ def next_level(player, camera, all_sprites, platforms):
 def load_room(level_data):
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
+    targets = pygame.sprite.Group()
+
     for platform_data in level_data['platforms']:
         platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'], platform_data.get('breakable', False))
         platform.z_index = 0
@@ -133,13 +136,21 @@ def load_room(level_data):
             decoration_data.get('z_index', 0)
         )
         all_sprites.add(decoration)
+    for target_data in level_data.get('targets', []):
+        target = Target(target_data['x'], target_data['y'])
+        target.z_index = 0
+        print('adding target, :', target)
+        targets.add(target)
+        all_sprites.add(target)
+    print(targets)
+
     goal = Goal(**level_data['goal'])
     goal.z_index = 0
     all_sprites.add(goal)
     spawn_point = SpawnPoint(**level_data['spawn_point'])
     spawn_point.z_index = 0
     all_sprites.add(spawn_point)
-    return all_sprites, platforms, goal, spawn_point
+    return all_sprites, platforms, goal, spawn_point, targets
 
 def main():
     global CURRENT_ROOM
@@ -148,7 +159,7 @@ def main():
     background_rect = background.get_rect()
     background_rect.bottom = SCREEN_HEIGHT
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
-    all_sprites, platforms, goal, spawn_point = load_room(level_data)
+    all_sprites, platforms, goal, spawn_point, targets = load_room(level_data)
     player = Player()
     reset_player_and_camera(player, Camera(SCREEN_WIDTH, SCREEN_HEIGHT), spawn_point)
     player.set_platforms(platforms)
@@ -167,7 +178,7 @@ def main():
                 elif event.key == pygame.K_w:
                     player.jump()
                 elif event.key == pygame.K_RETURN:
-                    goal, all_sprites, platforms, spawn_point = switch_game_state(player, camera, all_sprites, platforms)
+                    goal, all_sprites, platforms, spawn_point, targets = switch_game_state(player, camera, all_sprites, platforms)
                     player.set_platforms(platforms)
                     print(f"Moving to {CURRENT_ROOM}")
                 elif event.key == pygame.K_r:
@@ -175,7 +186,7 @@ def main():
                     print(f"Resting {CURRENT_ROOM}")
                 elif event.key == pygame.K_ESCAPE:
                     running = False
-                elif event.key == pygame.K_HASH:
+                elif event.key == pygame.K_p:
                     player.attack()
                     # check if player is colliding with breakable platform if so break it
                     attack_rect = player.rect.inflate(20,10)  # Expand collision area by 20 pixels width, 10 pixels height
@@ -184,11 +195,13 @@ def main():
                             # create a projectile from the player towards the right
                             projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, 1, 10)
                             projectile.set_platforms(platforms)
+                            projectile.set_targets(targets)
                             all_sprites.add(projectile)
                         elif player.last_direction_faced == 'left':
                             # create a projectile from the player towards the left
                             projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, -1, 10)
                             projectile.set_platforms(platforms)
+                            projectile.set_targets(targets)
                             all_sprites.add(projectile)
                     else:
                         for platform in platforms:

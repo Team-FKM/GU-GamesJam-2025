@@ -1,50 +1,17 @@
 {
-    "platforms": [
-        {
-            "x": 1050,
-            "y": 1136,
-            "width": 20,
-            "height": 200,
-            "breakable": false
-        },
-        {
-            "x": 1128,
-            "y": 1138,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        }
-    ],
+    "platforms": [],
     "goal": {
-        "x": 1400,
-        "y": 1058,
+        "x": 10,
+        "y": 10,
         "width": 50,
         "height": 50
     },
     "spawn_point": {
-        "x": 1578,
-        "y": 788,
+        "x": 10,
+        "y": 10,
         "width": 20,
         "height": 20
     },
-    "decorations": [
-        {
-            "type": "tree",
-            "x": 1742,
-            "y": 576,
-            "z_index": -2
-        },
-        {
-            "type": "black_fill",
-            "x": 142,
-            "y": 360,
-            "z_index": -1
-        },
-        {
-            "type": "bush",
-            "x": 550,
-            "y": 702,
-            "z_index": 0
-        }
-    ]
+    "decorations": [],
+    "targets": []
 }

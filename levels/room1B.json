@@ -1,45 +1,72 @@
 {
     "platforms": [
         {
-            "x": 674,
-            "y": 1060,
+            "x": 320,
+            "y": 1138,
+            "width": 410,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 302,
+            "y": 958,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 726,
+            "y": 958,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 302,
+            "y": 942,
             "width": 200,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 1034,
-            "y": 1060,
-            "width": 20,
-            "height": 200,
-            "breakable": true
+            "x": 546,
+            "y": 1046,
+            "width": 200,
+            "height": 20,
+            "breakable": false
         },
         {
-            "x": 966,
-            "y": 1060,
+            "x": 622,
+            "y": 958,
             "width": 200,
             "height": 20,
             "breakable": false
         }
     ],
     "goal": {
-        "x": 1704,
-        "y": 138,
+        "x": 722,
+        "y": 880,
         "width": 50,
         "height": 50
     },
     "spawn_point": {
-        "x": 306,
-        "y": 1046,
+        "x": 356,
+        "y": 1062,
         "width": 20,
         "height": 20
     },
     "decorations": [
         {
-            "type": "tree",
-            "x": 1582,
-            "y": 710,
-            "z_index": -2
+            "type": "bush",
+            "x": 566,
+            "y": 998,
+            "z_index": 0
+        }
+    ],
+    "targets": [
+        {
+            "x": 530,
+            "y": 1078
         }
     ]
 }

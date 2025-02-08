@@ -10,6 +10,7 @@ class Projectile(pygame.sprite.Sprite):
         self.direction = direction
         self.speed = speed
         self.platforms = None
+        self.targets = None
 
     def update(self):
         self.rect.x += self.direction * self.speed
@@ -23,6 +24,13 @@ class Projectile(pygame.sprite.Sprite):
             if self.check_collision(platform):
                 self.destroy()
 
+        # Check for collisions with targets
+        for target in self.targets:
+            if self.rect.colliderect(target.rect):
+                target.destroy()
+                self.destroy()
+                break
+
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
@@ -34,3 +42,6 @@ class Projectile(pygame.sprite.Sprite):
 
     def set_platforms(self, platforms):
         self.platforms = platforms
+
+    def set_targets(self, targets):
+        self.targets = targets
