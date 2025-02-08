@@ -194,13 +194,13 @@ def main():
                     if player.player_state:
                         if player.last_direction_faced == 'right':
                             # create a projectile from the player towards the right
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, 1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)
                         elif player.last_direction_faced == 'left':
                             # create a projectile from the player towards the left
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, -1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)

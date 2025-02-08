@@ -37,7 +37,7 @@ def credits_screen():
     while True:
         screen.blit(menu_background, (0, 0))
         draw_text("Credits", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
-        draw_text("Game developed by Fraser Levack", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        draw_text("Game developed by Fraser Levack & Kai", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -69,7 +69,7 @@ def main_menu():
         screen.blit(menu_background, (0, 0))
 
         # Draw title
-        draw_text("Platformer", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 8)
+        draw_text("Glasgow Knight", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 8)
 
         # Draw buttons
         mouse_pos = pygame.mouse.get_pos()
