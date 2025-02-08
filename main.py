@@ -98,6 +98,9 @@ def switch_game_state(player, camera, all_sprites, platforms):
     reset_player_and_camera(player, camera, spawn_point, player_position)
     player.set_platforms(platforms)
     player.z_index = 0
+    # switching player state
+    player.switch_player_state()
+    print(player.player_state)
     all_sprites.add(player)
     return new_goal, all_sprites, platforms, spawn_point
 

@@ -24,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = False
         self.attacking = False
         self.acceleration = 0
+        self.player_state = False
 
     def update(self):
         self.calc_grav()
@@ -95,7 +96,10 @@ class Player(pygame.sprite.Sprite):
 
     def attack(self):
         self.attacking = True
-        self.set_player_image('sprites/player/player_attack.png')
+        if self.player_state:
+            self.set_player_image('sprites/player/player_attackB.png')
+        else:
+            self.set_player_image('sprites/player/player_attackA.png')
         pygame.time.set_timer(pygame.USEREVENT + 1, 100)  # Custom event for ending attack animation
 
     def go_left(self):
@@ -117,6 +121,9 @@ class Player(pygame.sprite.Sprite):
             if self.change_x > 0:
                 self.change_x = 0
         self.set_player_image('sprites/player/player.png')
+
+    def switch_player_state(self):
+        self.player_state = not self.player_state
 
     def set_platforms(self, platforms):
         self.platforms = platforms
