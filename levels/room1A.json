@@ -11,26 +11,32 @@
             "y": 1138,
             "width": 200,
             "height": 20
+        },
+        {
+            "x": 1402,
+            "y": 1088,
+            "width": 200,
+            "height": 20
         }
     ],
     "goal": {
-        "x": 1456,
-        "y": 1032,
+        "x": 1442,
+        "y": 960,
         "width": 50,
         "height": 50
     },
     "spawn_point": {
-        "x": 1578,
-        "y": 788,
+        "x": 754,
+        "y": 1106,
         "width": 20,
         "height": 20
     },
     "decorations": [
         {
             "type": "tree",
-            "x": 1446,
-            "y": 682,
-            "z_index": -1
+            "x": 138,
+            "y": 720,
+            "z_index": -2
         },
         {
             "type": "bush",
