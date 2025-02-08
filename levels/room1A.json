@@ -34,6 +34,13 @@
             "width": 20,
             "height": 200,
             "breakable": true
+        },
+        {
+            "x": 718,
+            "y": 956,
+            "width": 200,
+            "height": 20,
+            "breakable": false
         }
     ],
     "goal": {
@@ -51,9 +58,9 @@
     "decorations": [
         {
             "type": "bush",
-            "x": 982,
-            "y": 968,
-            "z_index": 0
+            "x": 860,
+            "y": 908,
+            "z_index": 1
         }
     ],
     "targets": []

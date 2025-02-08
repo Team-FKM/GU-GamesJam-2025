@@ -159,6 +159,7 @@ def main():
     background_rect.bottom = SCREEN_HEIGHT
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
     all_sprites, platforms, goal, spawn_point, targets = load_room(level_data)
+    projectiles = pygame.sprite.Group()
     player = Player()
     reset_player_and_camera(player, Camera(SCREEN_WIDTH, SCREEN_HEIGHT), spawn_point)
     player.set_platforms(platforms)
@@ -195,13 +196,13 @@ def main():
                             projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, 1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
-                            all_sprites.add(projectile)
+                            projectiles.add(projectile)
                         elif player.last_direction_faced == 'left':
                             # create a projectile from the player towards the left
                             projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y, -1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
-                            all_sprites.add(projectile)
+                            projectiles.add(projectile)
                     else:
                         for platform in platforms:
                             if attack_rect.colliderect(platform.rect):
@@ -225,7 +226,7 @@ def main():
 
 
         # Check for collisions between projectiles and targets
-        for projectile in all_sprites:
+        for projectile in projectiles:
             if isinstance(projectile, Projectile):
                 new_platform = projectile.update()
                 if new_platform:
@@ -243,7 +244,7 @@ def main():
         camera.update(player)
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
-        sorted_sprites = sorted(all_sprites, key=lambda sprite: getattr(sprite, 'z_index', 0))
+        sorted_sprites = sorted(all_sprites.sprites() + projectiles.sprites(), key=lambda sprite: getattr(sprite, 'z_index', 0))
 
         for sprite in sorted_sprites:
             screen.blit(sprite.image, camera.apply(sprite))

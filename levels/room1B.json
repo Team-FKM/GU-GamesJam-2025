@@ -29,23 +29,58 @@
             "breakable": false
         },
         {
-            "x": 546,
-            "y": 1046,
+            "x": 726,
+            "y": 958,
             "width": 200,
             "height": 20,
             "breakable": false
         },
         {
-            "x": 622,
-            "y": 958,
+            "x": 482,
+            "y": 762,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 482,
+            "y": 762,
+            "width": 200,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 908,
+            "y": 778,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 510,
+            "y": 1082,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 708,
+            "y": 1004,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 730,
+            "y": 762,
             "width": 200,
             "height": 20,
             "breakable": false
         }
     ],
     "goal": {
-        "x": 722,
-        "y": 880,
+        "x": 2242,
+        "y": 938,
         "width": 50,
         "height": 50
     },
@@ -55,18 +90,11 @@
         "width": 20,
         "height": 20
     },
-    "decorations": [
-        {
-            "type": "bush",
-            "x": 566,
-            "y": 998,
-            "z_index": 0
-        }
-    ],
+    "decorations": [],
     "targets": [
         {
-            "x": 530,
-            "y": 1078
+            "x": 604,
+            "y": 1024
         }
     ]
 }
