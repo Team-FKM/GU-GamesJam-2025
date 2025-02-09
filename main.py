@@ -161,7 +161,7 @@ def load_room(level_data):
     return all_sprites, platforms, goal, spawn_point, targets
 
 def pause_menu():
-    font = pygame.font.Font(None, 74)
+    font = pygame.font.Font(None, 35)
     text = font.render("Paused", True, WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
     resume_text = font.render("Press ESC to Resume", True, WHITE)
@@ -170,12 +170,20 @@ def pause_menu():
     quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     main_menu_text = font.render("Press SPACE to go to Main Menu", True, WHITE)
     main_menu_rect = main_menu_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+
+    # small controls text.
+    controls_text = font.render(" Controls: WASD to move, P to attack, R to reset, Enter to switch between environments.", True, WHITE)
+    controls_rect = controls_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
+    explanation_text = font.render("Your attack changes when you switch environments.", True, WHITE)
+    explanation_rect = explanation_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 200))
     
     screen.fill((0, 0, 0))  # Dark background
     screen.blit(text, text_rect)
     screen.blit(resume_text, resume_rect)
     screen.blit(quit_text, quit_rect)
     screen.blit(main_menu_text, main_menu_rect)
+    screen.blit(controls_text, controls_rect)
+    screen.blit(explanation_text, explanation_rect)
     pygame.display.flip()
     if pygame.key.get_pressed()[pygame.K_q]:
         pygame.quit()
@@ -309,6 +317,8 @@ def main():
                     paused=False
                     main_menu()
             continue
+
+
         # Update all sprites
         all_sprites.update()
 
@@ -320,6 +330,12 @@ def main():
         camera.update(player)
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
+
+        # adding text in top left corner to explain pause menu is escape
+        font = pygame.font.Font(None, 25)
+        text = font.render("Press ESC to Pause and find controls.", True, WHITE)
+        screen.blit(text, (10, 10))
+
         sorted_sprites = sorted(all_sprites.sprites() + projectiles.sprites(), key=lambda sprite: getattr(sprite, 'z_index', 0))
 
         for sprite in sorted_sprites:
