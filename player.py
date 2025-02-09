@@ -9,6 +9,7 @@ GRAVITY = 1
 JUMP_STRENGTH = 15
 ACCELERATION = 0.6
 MAX_SPEED = 6
+ANIMATION_SPEED = 150  # Time between frame changes in milliseconds
 
 
 class Player(pygame.sprite.Sprite):
@@ -25,11 +26,27 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False
         self.acceleration = 0
         self.player_state = False
-        self.last_direction_faced = 'right'  # Initialize last direction faced
+        self.last_direction_faced = 'right'
+
+        # Animation variables
+        self.walking_frame = 1  # Track which walking frame we're on
+        self.last_frame_update = pygame.time.get_ticks()  # Track when we last changed frames
 
     def update(self):
         self.calc_grav()
         self.rect.x += self.change_x
+
+        # Update animation if moving
+        if self.acceleration != 0:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.last_frame_update > ANIMATION_SPEED:
+                self.walking_frame = 3 - self.walking_frame  # Toggle between 1 and 2
+                self.last_frame_update = current_time
+                # Update the walking animation frame
+                if self.acceleration < 0:  # Moving left
+                    self.set_player_image(f'sprites/player/player_left{self.walking_frame}.png')
+                else:  # Moving right
+                    self.set_player_image(f'sprites/player/player_right{self.walking_frame}.png')
 
         # Check for collision with platforms
         platform_hit_list = pygame.sprite.spritecollide(self, self.platforms, False)
@@ -100,18 +117,19 @@ class Player(pygame.sprite.Sprite):
         if self.player_state:
             self.set_player_image('sprites/player/player_attackB.png')
         else:
-            self.set_player_image('sprites/player/player_attackA.png')
+            if self.last_direction_faced == 'right':
+                self.set_player_image('sprites/player/player_attackA_right.png')
+            else:
+                self.set_player_image('sprites/player/player_attackA_left.png')
         pygame.time.set_timer(pygame.USEREVENT + 1, 100)  # Custom event for ending attack animation
 
     def go_left(self):
         self.acceleration = -ACCELERATION
-        self.set_player_image('sprites/player/player_left.png')
-        self.last_direction_faced = 'left'  # Update last direction faced
+        self.last_direction_faced = 'left'
 
     def go_right(self):
         self.acceleration = ACCELERATION
-        self.set_player_image('sprites/player/player_right.png')
-        self.last_direction_faced = 'right'  # Update last direction faced
+        self.last_direction_faced = 'right'
 
     def stop(self):
         self.acceleration = 0

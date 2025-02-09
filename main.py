@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import re
+import random as rnd
 from player import Player
 from camera import Camera
 from game_objects.platform import Platform
@@ -12,6 +13,7 @@ from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
 from game_objects.projectile import Projectile
 from game_objects.target import Target
+from game_objects.particle import Particle
 from menu import main_menu  # Import the menu
 from audio_manager import AudioManager
 
@@ -140,7 +142,8 @@ def load_room(level_data):
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
             decoration_data['y'],
-            decoration_data.get('z_index', 0)
+            decoration_data.get('z_index', 0),
+            decoration_data.get('scale', 1)
         )
         all_sprites.add(decoration)
     for target_data in level_data.get('targets', []):
@@ -157,6 +160,47 @@ def load_room(level_data):
     all_sprites.add(spawn_point)
     return all_sprites, platforms, goal, spawn_point, targets
 
+def pause_menu():
+    font = pygame.font.Font(None, 35)
+    text = font.render("Paused", True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    resume_text = font.render("Press ESC to Resume", True, WHITE)
+    resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    quit_text = font.render("Press Q to Quit", True, WHITE)
+    quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    main_menu_text = font.render("Press SPACE to go to Main Menu", True, WHITE)
+    main_menu_rect = main_menu_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+
+    # small controls text.
+    controls_text = font.render(" Controls: WASD to move, P to attack, R to reset, Enter to switch between environments.", True, WHITE)
+    controls_rect = controls_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
+    explanation_text = font.render("Your attack changes when you switch environments. hit r if you get stuck.", True, WHITE)
+    explanation_rect = explanation_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 200))
+    
+    screen.fill((0, 0, 0))  # Dark background
+    screen.blit(text, text_rect)
+    screen.blit(resume_text, resume_rect)
+    screen.blit(quit_text, quit_rect)
+    screen.blit(main_menu_text, main_menu_rect)
+    screen.blit(controls_text, controls_rect)
+    screen.blit(explanation_text, explanation_rect)
+    pygame.display.flip()
+    if pygame.key.get_pressed()[pygame.K_q]:
+        pygame.quit()
+        sys.exit()
+        return
+
+
+def winning_screen():
+    font = pygame.font.Font(None, 35)
+    text = font.render("You Win!", True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.fill((0, 0, 0))  # Dark background
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    pygame.time.wait(3000)
+
+
 def main():
     global CURRENT_ROOM
     background = pygame.image.load('backgrounds/glasgow_uni.png').convert_alpha()
@@ -172,6 +216,9 @@ def main():
     all_sprites.add(player)
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
     running = True
+    paused = False
+    game_won = False
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -198,8 +245,8 @@ def main():
                 elif event.key == pygame.K_r:
                     reset_player_and_camera(player, camera, spawn_point)
                     print(f"Resting {CURRENT_ROOM}")
-                elif event.key == pygame.K_ESCAPE:
-                    running = False
+                elif event.key == pygame.K_ESCAPE and not paused:
+                    paused = not paused
                 elif event.key == pygame.K_p:
                     player.attack()
                     # check if player is colliding with breakable platform if so break it
@@ -207,13 +254,13 @@ def main():
                     if player.player_state:
                         if player.last_direction_faced == 'right':
                             # create a projectile from the player towards the right
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow_right.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)
                         elif player.last_direction_faced == 'left':
                             # create a projectile from the player towards the left
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow_left.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)
@@ -224,6 +271,21 @@ def main():
                                     platforms.remove(platform)
                                     all_sprites.remove(platform)
                                     player.set_platforms(platforms)
+
+                                    # add three small brown particles
+                                    for i in range(3):  # Create 5 particles instead of 3
+                                        particle = Particle(
+                                            color=(139, 69, 19),  # Brown color
+                                            x=platform.rect.centerx + rnd.randint(-10, 10),
+                                            # Spread particles around
+                                            y=platform.rect.centery + rnd.randint(-10, 10),
+                                            width=rnd.randint(10, 20),  # Random sizes
+                                            height=rnd.randint(10, 15),
+                                            dx=rnd.uniform(-3, 3),  # Random horizontal velocity
+                                            dy=rnd.uniform(-8, -4)  # Initial upward velocity
+                                        )
+                                        all_sprites.add(particle)
+
                                     # set all platforms of projectiles
                                     for sprite in all_sprites:
                                         if isinstance(sprite, Projectile):
@@ -231,7 +293,6 @@ def main():
 
             elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
                 player.attacking = False
-                player.set_player_image('sprites/player/player.png')  # Reset to idle sprite
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
@@ -245,6 +306,34 @@ def main():
                 if new_platform:
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
+                    # make some particles when a platform is created white color
+                    for i in range(3):  # Create 5 particles instead of 3
+                        particle = Particle(
+                            color=(255, 255, 255),  # White color
+                            x=new_platform.rect.centerx + rnd.randint(-10, 10),
+                            # Spread particles around
+                            y=new_platform.rect.centery + rnd.randint(-10, 10),
+                            width=rnd.randint(10, 20),  # Random sizes
+                            height=rnd.randint(10, 15),
+                            dx=rnd.uniform(-3, 3),  # Random horizontal velocity
+                            dy=rnd.uniform(-8, -4)  # Initial upward velocity
+                        )
+                        all_sprites.add(particle)
+
+
+        if paused:
+            pause_menu()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    paused = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    paused=False
+                    main_menu()
+            continue
+
+        if game_won:
+            winning_screen()
+            break
 
         # Update all sprites
         all_sprites.update()
@@ -253,20 +342,29 @@ def main():
             goal, all_sprites, platforms, spawn_point = next_level(player, camera, all_sprites, platforms)
             player.set_platforms(platforms)
             print(f"Moving to {CURRENT_ROOM}")
+            # if current room is higher than 3 then player wins
+            if int(CURRENT_ROOM[4]) > 3:
+                game_won = True
 
         camera.update(player)
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
+
+        # adding text in top left corner to explain pause menu is escape
+        font = pygame.font.Font(None, 25)
+        text = font.render("Press ESC to Pause and find controls.", True, WHITE)
+        screen.blit(text, (10, 10))
+
         sorted_sprites = sorted(all_sprites.sprites() + projectiles.sprites(), key=lambda sprite: getattr(sprite, 'z_index', 0))
 
         for sprite in sorted_sprites:
             if isinstance(sprite, Decoration):
                 # Apply parallax effect based on z_index
                 if sprite.z_index >= 10:
-                    parallax_factor = -0.2  # Foreground moves
+                    parallax_factor = -0.1  # Foreground moves
                     sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
                 elif sprite.z_index <= -10:
-                    parallax_factor = 0.2  # Background moves faster
+                    parallax_factor = 0.1  # Background moves faster
                     sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
             screen.blit(sprite.image, camera.apply(sprite))
         pygame.display.flip()

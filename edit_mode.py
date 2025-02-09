@@ -21,6 +21,7 @@ ZOOM_FACTOR = 0.5
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (100, 100, 100)
+BROWN = (139, 69, 19)
 RED = (255, 0, 0)
 
 # Button dimensions
@@ -107,7 +108,8 @@ def load_sprites(level_data):
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
             decoration_data['y'],
-            decoration_data['z_index']
+            decoration_data['z_index'],
+            decoration_data.get('scale', 1)
         )
         decoration.decoration_type = decoration_data['type']
         decorations.add(decoration)
@@ -132,7 +134,7 @@ def save_level(filename, platforms, goal, spawn_point, decorations, targets):
                       for p in platforms],
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
         'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
-        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
+        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index, 'scale': d.scale}
                         for d in decorations],
         'targets': [{'x': t.rect.x, 'y': t.rect.y} for t in targets]
     }
@@ -277,7 +279,7 @@ def main():
                     selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
                     selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
                     if selected_object.breakable:
-                        selected_object.image.fill(GREY)
+                        selected_object.image.fill(BROWN)
                     else:
                         selected_object.image.fill(BLACK)
 
@@ -286,6 +288,10 @@ def main():
                         selected_object.z_index += 1
                     elif event.key == pygame.K_DOWN:
                         selected_object.z_index -= 1
+                    elif event.key == pygame.K_RIGHT:
+                        selected_object.set_scale(min(2, selected_object.scale + 0.1))
+                    elif event.key == pygame.K_LEFT:
+                        selected_object.set_scale(max(0.1, selected_object.scale - 0.1))
 
         # Draw everything
         screen.fill(WHITE)
@@ -300,7 +306,7 @@ def main():
 
             # Display z-index for decorations
             if isinstance(sprite, Decoration):
-                z_index_text = font.render(f"z: {sprite.z_index}", True, BLACK)
+                z_index_text = font.render(f"z: {sprite.z_index}", True, (255,0,0))
                 text_position = (scaled_rect.x, scaled_rect.y - 20)  # Position text above the decoration
                 screen.blit(z_index_text, text_position)
 
@@ -314,7 +320,7 @@ def main():
         screen.blit(add_target_image, add_target_rect.topleft)
 
         # Display current decoration type
-        decoration_text = font.render(f"Current: {current_decoration_type}", True, BLACK)
+        decoration_text = font.render(f"Current: {current_decoration_type}", True, (0,255,0))
         screen.blit(decoration_text, (SCREEN_WIDTH - 200, 3 * BUTTON_HEIGHT + 40))
 
         # Highlight selected object
