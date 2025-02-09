@@ -57,37 +57,30 @@
             "breakable": false
         },
         {
-            "x": 1334,
-            "y": 1024,
-            "width": 20,
-            "height": 200,
-            "breakable": false
-        },
-        {
-            "x": 1332,
-            "y": 1026,
-            "width": 290,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 1602,
-            "y": 1028,
-            "width": 20,
-            "height": 200,
-            "breakable": false
-        },
-        {
             "x": 608,
             "y": 838,
             "width": 20,
             "height": 350,
             "breakable": true
+        },
+        {
+            "x": 1008,
+            "y": 770,
+            "width": 200,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 1568,
+            "y": 1068,
+            "width": 150,
+            "height": 20,
+            "breakable": false
         }
     ],
     "goal": {
-        "x": 1348,
-        "y": 924,
+        "x": 1954,
+        "y": 1050,
         "width": 50,
         "height": 50
     },
@@ -113,11 +106,53 @@
             "scale": 0.6000000000000001
         },
         {
-            "type": "future_fill",
-            "x": 1332,
-            "y": 1024,
-            "z_index": 1,
+            "type": "for_statue",
+            "x": 786,
+            "y": 982,
+            "z_index": 10,
+            "scale": 1
+        },
+        {
+            "type": "gla_statue",
+            "x": 1374,
+            "y": 1088,
+            "z_index": 10,
+            "scale": 1
+        },
+        {
+            "type": "lamp",
+            "x": 1118,
+            "y": 786,
+            "z_index": -10,
+            "scale": 1
+        },
+        {
+            "type": "lightbulb",
+            "x": 1082,
+            "y": 788,
+            "z_index": -10,
+            "scale": 1
+        },
+        {
+            "type": "old_fill_thin",
+            "x": 1572,
+            "y": 1070,
+            "z_index": 0,
             "scale": 0.6000000000000001
+        },
+        {
+            "type": "pillar",
+            "x": 748,
+            "y": 846,
+            "z_index": -10,
+            "scale": 1
+        },
+        {
+            "type": "sput_statue",
+            "x": 1310,
+            "y": 1086,
+            "z_index": 10,
+            "scale": 1
         }
     ],
     "targets": [
