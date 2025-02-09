@@ -140,7 +140,8 @@ def load_room(level_data):
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
             decoration_data['y'],
-            decoration_data.get('z_index', 0)
+            decoration_data.get('z_index', 0),
+            decoration_data.get('scale', 1)
         )
         all_sprites.add(decoration)
     for target_data in level_data.get('targets', []):

@@ -107,7 +107,8 @@ def load_sprites(level_data):
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
             decoration_data['y'],
-            decoration_data['z_index']
+            decoration_data['z_index'],
+            decoration_data.get('scale', 1)
         )
         decoration.decoration_type = decoration_data['type']
         decorations.add(decoration)
@@ -132,7 +133,7 @@ def save_level(filename, platforms, goal, spawn_point, decorations, targets):
                       for p in platforms],
         'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
         'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
-        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
+        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index, 'scale': d.scale}
                         for d in decorations],
         'targets': [{'x': t.rect.x, 'y': t.rect.y} for t in targets]
     }
@@ -286,6 +287,10 @@ def main():
                         selected_object.z_index += 1
                     elif event.key == pygame.K_DOWN:
                         selected_object.z_index -= 1
+                    elif event.key == pygame.K_RIGHT:
+                        selected_object.set_scale(min(2, selected_object.scale + 0.1))
+                    elif event.key == pygame.K_LEFT:
+                        selected_object.set_scale(max(0.1, selected_object.scale - 0.1))
 
         # Draw everything
         screen.fill(WHITE)

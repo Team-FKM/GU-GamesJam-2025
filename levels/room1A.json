@@ -29,8 +29,8 @@
             "breakable": false
         },
         {
-            "x": 2070,
-            "y": 1120,
+            "x": 2034,
+            "y": 1110,
             "width": 200,
             "height": 20,
             "breakable": false
@@ -95,127 +95,155 @@
             "type": "black_arch_start",
             "x": 146,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 190,
             "y": 960,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 316,
             "y": 962,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 438,
             "y": 960,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 570,
             "y": 960,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 718,
             "y": 958,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 264,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 504,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch_end",
             "x": 1938,
             "y": 946,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 744,
             "y": 946,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 826,
             "y": 944,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 974,
             "y": 946,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 1118,
             "y": 944,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 1284,
             "y": 946,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 1446,
             "y": 946,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 1598,
             "y": 946,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "pillar",
             "x": 1770,
             "y": 946,
-            "z_index": -10
+            "z_index": -10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 982,
             "y": 946,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 1222,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 1462,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
         },
         {
             "type": "black_arch",
             "x": 1700,
             "y": 944,
-            "z_index": 10
+            "z_index": 10,
+            "scale": 1
+        },
+        {
+            "type": "stonePlatform",
+            "x": 1996,
+            "y": 1108,
+            "z_index": 1,
+            "scale": 0.2
         }
     ],
     "targets": [

@@ -162,28 +162,11 @@
     },
     "decorations": [
         {
-            "type": "black_fill",
-            "x": 418,
-            "y": 1062,
-            "z_index": 0
-        },
-        {
-            "type": "black_fill",
-            "x": -282,
-            "y": 504,
-            "z_index": 0
-        },
-        {
-            "type": "black_fill",
-            "x": 98,
-            "y": 322,
-            "z_index": 0
-        },
-        {
-            "type": "black_fill",
-            "x": 934,
-            "y": 490,
-            "z_index": 0
+            "type": "stonePlatform",
+            "x": 1220,
+            "y": 786,
+            "z_index": 0,
+            "scale": 0.1
         }
     ],
     "targets": [
