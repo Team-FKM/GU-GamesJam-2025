@@ -285,6 +285,19 @@ def main():
                 if new_platform:
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
+                    # make some particles when a platform is created white color
+                    for i in range(3):  # Create 5 particles instead of 3
+                        particle = Particle(
+                            color=(255, 255, 255),  # White color
+                            x=new_platform.rect.centerx + rnd.randint(-10, 10),
+                            # Spread particles around
+                            y=new_platform.rect.centery + rnd.randint(-10, 10),
+                            width=rnd.randint(10, 20),  # Random sizes
+                            height=rnd.randint(10, 15),
+                            dx=rnd.uniform(-3, 3),  # Random horizontal velocity
+                            dy=rnd.uniform(-8, -4)  # Initial upward velocity
+                        )
+                        all_sprites.add(particle)
 
 
         if paused:
