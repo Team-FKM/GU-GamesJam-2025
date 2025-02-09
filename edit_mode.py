@@ -306,7 +306,7 @@ def main():
 
             # Display z-index for decorations
             if isinstance(sprite, Decoration):
-                z_index_text = font.render(f"z: {sprite.z_index}", True, BLACK)
+                z_index_text = font.render(f"z: {sprite.z_index}", True, (255,0,0))
                 text_position = (scaled_rect.x, scaled_rect.y - 20)  # Position text above the decoration
                 screen.blit(z_index_text, text_position)
 
@@ -320,7 +320,7 @@ def main():
         screen.blit(add_target_image, add_target_rect.topleft)
 
         # Display current decoration type
-        decoration_text = font.render(f"Current: {current_decoration_type}", True, BLACK)
+        decoration_text = font.render(f"Current: {current_decoration_type}", True, (0,255,0))
         screen.blit(decoration_text, (SCREEN_WIDTH - 200, 3 * BUTTON_HEIGHT + 40))
 
         # Highlight selected object
