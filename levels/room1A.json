@@ -76,6 +76,13 @@
             "width": 20,
             "height": 200,
             "breakable": false
+        },
+        {
+            "x": 608,
+            "y": 838,
+            "width": 20,
+            "height": 350,
+            "breakable": true
         }
     ],
     "goal": {

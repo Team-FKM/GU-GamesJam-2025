@@ -232,7 +232,6 @@ def main():
 
             elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
                 player.attacking = False
-                player.set_player_image('sprites/player/player.png')  # Reset to idle sprite
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:

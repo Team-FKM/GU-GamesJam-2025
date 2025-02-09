@@ -21,6 +21,7 @@ ZOOM_FACTOR = 0.5
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (100, 100, 100)
+BROWN = (139, 69, 19)
 RED = (255, 0, 0)
 
 # Button dimensions
@@ -278,7 +279,7 @@ def main():
                     selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
                     selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
                     if selected_object.breakable:
-                        selected_object.image.fill(GREY)
+                        selected_object.image.fill(BROWN)
                     else:
                         selected_object.image.fill(BLACK)
 
