@@ -117,7 +117,10 @@ class Player(pygame.sprite.Sprite):
         if self.player_state:
             self.set_player_image('sprites/player/player_attackB.png')
         else:
-            self.set_player_image('sprites/player/player_attackA.png')
+            if self.last_direction_faced == 'right':
+                self.set_player_image('sprites/player/player_attackA_right.png')
+            else:
+                self.set_player_image('sprites/player/player_attackA_left.png')
         pygame.time.set_timer(pygame.USEREVENT + 1, 100)  # Custom event for ending attack animation
 
     def go_left(self):

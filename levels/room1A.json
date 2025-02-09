@@ -15,72 +15,72 @@
             "breakable": false
         },
         {
-            "x": 8,
-            "y": 928,
-            "width": 2040,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": -14,
-            "y": 938,
-            "width": 200,
-            "height": 70,
-            "breakable": false
-        },
-        {
-            "x": 2034,
-            "y": 1110,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 2166,
-            "y": 1062,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 2252,
-            "y": 1000,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 2340,
-            "y": 934,
-            "width": 200,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 2122,
-            "y": 880,
-            "width": 110,
-            "height": 20,
-            "breakable": false
-        },
-        {
-            "x": 908,
-            "y": 1110,
+            "x": 628,
+            "y": 1082,
             "width": 20,
-            "height": 120,
+            "height": 200,
             "breakable": false
         },
         {
-            "x": 1388,
-            "y": 1104,
+            "x": 628,
+            "y": 1082,
+            "width": 290,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 898,
+            "y": 1082,
             "width": 20,
-            "height": 130,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 1038,
+            "y": 996,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 1042,
+            "y": 996,
+            "width": 140,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 1162,
+            "y": 996,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 1334,
+            "y": 1024,
+            "width": 20,
+            "height": 200,
+            "breakable": false
+        },
+        {
+            "x": 1332,
+            "y": 1026,
+            "width": 290,
+            "height": 20,
+            "breakable": false
+        },
+        {
+            "x": 1602,
+            "y": 1028,
+            "width": 20,
+            "height": 200,
             "breakable": false
         }
     ],
     "goal": {
-        "x": 118,
-        "y": 848,
+        "x": 1348,
+        "y": 924,
         "width": 50,
         "height": 50
     },
@@ -92,158 +92,25 @@
     },
     "decorations": [
         {
-            "type": "black_arch_start",
-            "x": 146,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 190,
-            "y": 960,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 316,
-            "y": 962,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 438,
-            "y": 960,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 570,
-            "y": 960,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 718,
-            "y": 958,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 264,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 504,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch_end",
-            "x": 1938,
-            "y": 946,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 744,
-            "y": 946,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 826,
-            "y": 944,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 974,
-            "y": 946,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 1118,
-            "y": 944,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 1284,
-            "y": 946,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 1446,
-            "y": 946,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 1598,
-            "y": 946,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "pillar",
-            "x": 1770,
-            "y": 946,
-            "z_index": -10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 982,
-            "y": 946,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 1222,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 1462,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "black_arch",
-            "x": 1700,
-            "y": 944,
-            "z_index": 10,
-            "scale": 1
-        },
-        {
-            "type": "stonePlatform",
-            "x": 1996,
-            "y": 1108,
+            "type": "future_fill",
+            "x": 630,
+            "y": 1082,
             "z_index": 1,
-            "scale": 0.2
+            "scale": 0.6000000000000001
+        },
+        {
+            "type": "future_fill_thin",
+            "x": 1038,
+            "y": 996,
+            "z_index": 1,
+            "scale": 0.6000000000000001
+        },
+        {
+            "type": "future_fill",
+            "x": 1332,
+            "y": 1024,
+            "z_index": 1,
+            "scale": 0.6000000000000001
         }
     ],
     "targets": [
