@@ -52,7 +52,7 @@ def credits_screen():
     while True:
         screen.blit(menu_background, (0, 0))
         draw_text("Credits", font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
-        draw_text("Game developed by Fraser Levack & Kai", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        draw_text("Game developed by Fraser Levack, Kai & Rem", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         draw_text("Score by @Rosenrot on Newgrounds", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
         draw_text("Press ESC to return to the main menu", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.2)
 
