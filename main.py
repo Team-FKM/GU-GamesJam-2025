@@ -1,3 +1,4 @@
+# main.py
 import pygame
 import sys
 import json
@@ -9,11 +10,19 @@ from game_objects.platform import Platform
 from game_objects.goal import Goal
 from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
+from game_objects.projectile import Projectile
+from game_objects.target import Target
+from menu import main_menu  # Import the menu
+from audio_manager import AudioManager
 
 # Initialize Pygame
 pygame.init()
 
-# Screen dimensions
+# initialize audio manager
+audio_manager = AudioManager()
+audio_manager.load_sound('walk', 'audio/sounds/walking.wav')
+
+# Screen dimensions (scaled up)
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 600
 
@@ -40,7 +49,6 @@ DECORATION_TYPES = {
 }
 
 def draw_gradient(screen, start_color, end_color):
-    """Draw a vertical gradient from start_color to end_color."""
     for y in range(SCREEN_HEIGHT):
         color = [
             start_color[i] + (end_color[i] - start_color[i]) * y // SCREEN_HEIGHT
@@ -49,7 +57,6 @@ def draw_gradient(screen, start_color, end_color):
         pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))
 
 def load_level(filename):
-    """Load level data from a JSON file."""
     try:
         with open(filename, 'r') as file:
             level_data = json.load(file)
@@ -61,11 +68,11 @@ def load_level(filename):
             'platforms': [],
             'goal': {'x': 100, 'y': 100, 'width': 50, 'height': 50},
             'spawn_point': {'x': 0, 'y': 0, 'width': 50, 'height': 50},
-            'decorations': []
+            'decorations': [],
+            'targets': []
         }
 
 def increment_room(room_name):
-    """Increment the room number (e.g., room1A → room2A)."""
     match = re.match(r'room(\d+)([A-Za-z])', room_name)
     if match:
         room_number = int(match.group(1))
@@ -73,136 +80,97 @@ def increment_room(room_name):
         return f'room{room_number + 1}{room_letter}'
     return room_name
 
-def reset_player_and_camera(player, camera, spawn_point):
+def swap_room_letter(room_name):
+    match = re.match(r'room(\d+)([A-Za-z])', room_name)
+    if match:
+        return f'room{match.group(1)}B' if match.group(2) == 'A' else f'room{match.group(1)}A'
+    return room_name
+
+def reset_player_and_camera(player, camera, spawn_point, position=None):
     """Reset the player and camera to the starting position."""
-    player.rect.x = spawn_point.rect.x
-    player.rect.y = spawn_point.rect.y
+    if position:
+        player.rect.x, player.rect.y = position
+    else:
+        player.rect.x = spawn_point.rect.x
+        player.rect.y = spawn_point.rect.y
     camera.camera.x = 0
     camera.camera.y = 0
 
-def next_level(player, camera, all_sprites, platforms):
-    """Move to the next level."""
+def switch_game_state(player, camera, all_sprites, platforms):
     global CURRENT_ROOM
-    CURRENT_ROOM = increment_room(CURRENT_ROOM)
-
-    # Load new level data
+    CURRENT_ROOM = swap_room_letter(CURRENT_ROOM)
     level_data = load_level(f'levels/{CURRENT_ROOM}.json')
-
-    # Clear existing sprites
+    # store player position
+    player_position = (player.rect.x, player.rect.y)
     all_sprites.empty()
     platforms.empty()
+    all_sprites, platforms, new_goal, spawn_point, targets = load_room(level_data)
+    reset_player_and_camera(player, camera, spawn_point, player_position)
+    player.set_platforms(platforms)
+    player.z_index = 0
+    # switching player state
+    player.switch_player_state()
+    all_sprites.add(player)
+    return new_goal, all_sprites, platforms, spawn_point, targets
 
-    # Load new platforms (z_index = 0)
-    for platform_data in level_data['platforms']:
-        platform = Platform(
-            platform_data['x'],
-            platform_data['y'],
-            platform_data['width'],
-            platform_data['height']
-        )
-        platform.z_index = 0
-        platforms.add(platform)
-        all_sprites.add(platform)
-
-    # Load new decorations with their z_index
-    for decoration_data in level_data.get('decorations', []):
-        decoration = Decoration(
-            DECORATION_TYPES[decoration_data['type']],
-            decoration_data['x'],
-            decoration_data['y'],
-            decoration_data.get('z_index', 0)  # Default to 0 if not specified
-        )
-        decoration.decoration_type = decoration_data['type']
-        decoration.z_index = decoration_data.get('z_index', 0)
-        all_sprites.add(decoration)
-
-    # Load new goal (z_index = 0)
-    goal_data = level_data['goal']
-    new_goal = Goal(
-        goal_data['x'],
-        goal_data['y'],
-        goal_data['width'],
-        goal_data['height']
-    )
-    new_goal.z_index = 0
-    all_sprites.add(new_goal)
-
-    # Load new spawn point (z_index = 0)
-    spawn_point_data = level_data['spawn_point']
-    spawn_point = SpawnPoint(
-        spawn_point_data['x'],
-        spawn_point_data['y'],
-        spawn_point_data['width'],
-        spawn_point_data['height']
-    )
-    spawn_point.z_index = 0
-    all_sprites.add(spawn_point)
-
-    # Reset player position and add back to sprites
+def next_level(player, camera, all_sprites, platforms):
+    global CURRENT_ROOM
+    CURRENT_ROOM = increment_room(CURRENT_ROOM)
+    level_data = load_level(f'levels/{CURRENT_ROOM}.json')
+    all_sprites.empty()
+    platforms.empty()
+    all_sprites, platforms, new_goal, spawn_point, targets = load_room(level_data)
     reset_player_and_camera(player, camera, spawn_point)
     player.z_index = 0
     all_sprites.add(player)
+    return new_goal, all_sprites, platforms, spawn_point
 
-    return new_goal
-
-def main():
-    global CURRENT_ROOM
-
-    # Create sprite groups
+def load_room(level_data):
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
+    targets = pygame.sprite.Group()
 
-    # Load and scale background image
-    background = pygame.image.load('backgrounds/middle_ground.png').convert_alpha()
-    background = pygame.transform.scale(background, (SCREEN_WIDTH, background.get_height()))
-    background_rect = background.get_rect()
-    background_rect.bottom = SCREEN_HEIGHT
-
-    # Load initial level data
-    level_data = load_level(f'levels/{CURRENT_ROOM}.json')
-
-    # Load platforms (z_index = 0)
     for platform_data in level_data['platforms']:
-        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'], platform_data.get('breakable', False))
         platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
-
-    # Load decorations with their z_index
     for decoration_data in level_data.get('decorations', []):
         decoration = Decoration(
             DECORATION_TYPES[decoration_data['type']],
             decoration_data['x'],
             decoration_data['y'],
-            decoration_data.get('z_index', 0)  # Default to 0 if not specified
+            decoration_data.get('z_index', 0)
         )
-        decoration.decoration_type = decoration_data['type']
         all_sprites.add(decoration)
+    for target_data in level_data.get('targets', []):
+        target = Target(target_data['x'], target_data['y'])
+        target.z_index = 0
+        targets.add(target)
+        all_sprites.add(target)
 
-    # Load goal (z_index = 0)
-    goal_data = level_data['goal']
-    goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+    goal = Goal(**level_data['goal'])
     goal.z_index = 0
     all_sprites.add(goal)
-
-    # Load spawn_point (z_index = 0)
-    spawn_point_data = level_data['spawn_point']
-    spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'], spawn_point_data['height'])
+    spawn_point = SpawnPoint(**level_data['spawn_point'])
     spawn_point.z_index = 0
     all_sprites.add(spawn_point)
+    return all_sprites, platforms, goal, spawn_point, targets
 
-    # Create player (z_index = 0)
+def main():
+    global CURRENT_ROOM
+    background = pygame.image.load('backgrounds/glasgow_uni.png').convert_alpha()
+    background = pygame.transform.scale(background, (SCREEN_WIDTH, background.get_height()))
+    background_rect = background.get_rect()
+    background_rect.bottom = SCREEN_HEIGHT
+    level_data = load_level(f'levels/{CURRENT_ROOM}.json')
+    all_sprites, platforms, goal, spawn_point, targets = load_room(level_data)
+    projectiles = pygame.sprite.Group()
     player = Player()
-    player.rect.x = spawn_point.rect.x
-    player.rect.y = spawn_point.rect.y
-    player.z_index = 0
+    reset_player_and_camera(player, Camera(SCREEN_WIDTH, SCREEN_HEIGHT), spawn_point)
     player.set_platforms(platforms)
     all_sprites.add(player)
-
-    # Initialize camera
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
-
-    # Main game loop
     running = True
     while running:
         for event in pygame.event.get():
@@ -211,43 +179,106 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     player.go_left()
+                    if player.on_ground:
+                        audio_manager.play_sound('walk')
+                    else:
+                        audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_d:
                     player.go_right()
+                    if player.on_ground:
+                        audio_manager.play_sound('walk')
+                    else:
+                        audio_manager.stop_sound('walk')
                 elif event.key == pygame.K_w:
                     player.jump()
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_a and player.change_x < 0:
-                    player.stop()
-                elif event.key == pygame.K_d and player.change_x > 0:
-                    player.stop()
+                elif event.key == pygame.K_RETURN:
+                    goal, all_sprites, platforms, spawn_point, targets = switch_game_state(player, camera, all_sprites, platforms)
+                    player.set_platforms(platforms)
+                    print(f"Moving to {CURRENT_ROOM}")
+                elif event.key == pygame.K_r:
+                    reset_player_and_camera(player, camera, spawn_point)
+                    print(f"Resting {CURRENT_ROOM}")
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_p:
+                    player.attack()
+                    # check if player is colliding with breakable platform if so break it
+                    attack_rect = player.rect.inflate(20,10)  # Expand collision area by 20 pixels width, 10 pixels height
+                    if player.player_state:
+                        if player.last_direction_faced == 'right':
+                            # create a projectile from the player towards the right
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
+                            projectile.set_platforms(platforms)
+                            projectile.set_targets(targets)
+                            projectiles.add(projectile)
+                        elif player.last_direction_faced == 'left':
+                            # create a projectile from the player towards the left
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
+                            projectile.set_platforms(platforms)
+                            projectile.set_targets(targets)
+                            projectiles.add(projectile)
+                    else:
+                        for platform in platforms:
+                            if attack_rect.colliderect(platform.rect):
+                                if platform.broken():
+                                    platforms.remove(platform)
+                                    all_sprites.remove(platform)
+                                    player.set_platforms(platforms)
+                                    # set all platforms of projectiles
+                                    for sprite in all_sprites:
+                                        if isinstance(sprite, Projectile):
+                                            sprite.set_platforms(platforms)
 
-        # Update sprites
+            elif event.type == pygame.USEREVENT + 1:  # Custom attack animation timer
+                player.attacking = False
+                player.set_player_image('sprites/player/player.png')  # Reset to idle sprite
+
+            elif event.type == pygame.KEYUP:
+                if event.key in [pygame.K_a, pygame.K_d]:
+                    player.stop()
+                    audio_manager.stop_sound('walk')
+
+        # Check for collisions between projectiles and targets
+        for projectile in projectiles:
+            if isinstance(projectile, Projectile):
+                new_platform = projectile.update()
+                if new_platform:
+                    platforms.add(new_platform)
+                    all_sprites.add(new_platform)
+
+        # Update all sprites
         all_sprites.update()
 
-        # Check for goal collision
         if pygame.sprite.collide_rect(player, goal):
-            goal = next_level(player, camera, all_sprites, platforms)
+            goal, all_sprites, platforms, spawn_point = next_level(player, camera, all_sprites, platforms)
+            player.set_platforms(platforms)
             print(f"Moving to {CURRENT_ROOM}")
 
-        # Update camera
         camera.update(player)
-
-        # Draw everything
         draw_gradient(screen, START_COLOR, END_COLOR)
         screen.blit(background, background_rect.topleft)
+        sorted_sprites = sorted(all_sprites.sprites() + projectiles.sprites(), key=lambda sprite: getattr(sprite, 'z_index', 0))
 
-        # Sort sprites by z_index for proper layering
-        sorted_sprites = sorted(all_sprites, key=lambda sprite: sprite.z_index)
-
-        # Draw all sprites in order of z_index
         for sprite in sorted_sprites:
+            if isinstance(sprite, Decoration):
+                # Apply parallax effect based on z_index
+                if sprite.z_index >= 10:
+                    parallax_factor = -0.2  # Foreground moves
+                    sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
+                elif sprite.z_index <= -10:
+                    parallax_factor = 0.2  # Background moves faster
+                    sprite.rect.x = sprite.original_x - camera.camera.x * parallax_factor
             screen.blit(sprite.image, camera.apply(sprite))
-
         pygame.display.flip()
         clock.tick(60)
-
     pygame.quit()
     sys.exit()
 
 if __name__ == '__main__':
+    # Show the main menu before starting the game
+    main_menu()
+    audio_manager.stop_music()
+    audio_manager.load_music('audio/music/Medieval-rock.mp3')
+    audio_manager.play_music(loops=-1)
+    # Start the game loop
     main()

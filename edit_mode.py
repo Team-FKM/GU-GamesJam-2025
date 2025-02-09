@@ -5,6 +5,7 @@ from game_objects.platform import Platform
 from game_objects.goal import Goal
 from game_objects.spawn_point import SpawnPoint
 from game_objects.decoration import Decoration
+from game_objects.target import Target
 
 # Initialize Pygame
 pygame.init()
@@ -19,6 +20,7 @@ ZOOM_FACTOR = 0.5
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREY = (100, 100, 100)
 RED = (255, 0, 0)
 
 # Button dimensions
@@ -49,7 +51,6 @@ DECORATION_TYPES = {
     if name.endswith('.png')
 }
 
-
 def load_level(filename):
     """Load level data from a JSON file."""
     try:
@@ -66,49 +67,39 @@ def load_level(filename):
             'decorations': []
         }
 
-
-def save_level(filename, platforms, goal, spawn_point, decorations):
-    """Save level data to a JSON file."""
-    level_data = {
-        'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height}
-                      for p in platforms],
-        'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
-        'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
-        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
-                        for d in decorations]
-    }
-    with open(filename, 'w') as file:
-        json.dump(level_data, file, indent=4)
-
-
-def main():
-    # Create sprite groups
+def load_sprites(level_data):
+    # initialize sprite groups
     all_sprites = pygame.sprite.Group()
     platforms = pygame.sprite.Group()
     decorations = pygame.sprite.Group()
-
-    # Current room index
-    current_room_index = 0
-    current_decoration_type = list(DECORATION_TYPES.keys())[0]  # Start with first decoration
-
-    # Load level data for the current room
-    level_data = load_level(ROOMS[current_room_index])
+    targets = pygame.sprite.Group()
 
     # Load platforms
     for platform_data in level_data['platforms']:
-        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'])
+        platform = Platform(platform_data['x'], platform_data['y'], platform_data['width'], platform_data['height'], platform_data['breakable'])
+        platform.z_index = 0
         platforms.add(platform)
         all_sprites.add(platform)
 
     # Load goal
     goal_data = level_data['goal']
     goal = Goal(goal_data['x'], goal_data['y'], goal_data['width'], goal_data['height'])
+    goal.z_index = 0
     all_sprites.add(goal)
 
     # Load spawn point
     spawn_point_data = level_data['spawn_point']
-    spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'], spawn_point_data['height'])
+    spawn_point = SpawnPoint(spawn_point_data['x'], spawn_point_data['y'], spawn_point_data['width'],
+                             spawn_point_data['height'])
+    spawn_point.z_index = 0
     all_sprites.add(spawn_point)
+
+    # Load targets
+    for target_data in level_data.get('targets', []):
+        target = Target(target_data['x'], target_data['y'])
+        target.z_index = 0
+        all_sprites.add(target)
+        targets.add(target)
 
     # Load decorations
     for decoration_data in level_data.get('decorations', []):
@@ -122,6 +113,43 @@ def main():
         decorations.add(decoration)
         all_sprites.add(decoration)
 
+    return all_sprites, platforms, goal, spawn_point, decorations, targets
+
+def draw_sprite(sprite):
+    scaled_rect = pygame.Rect(
+        sprite.rect.x * ZOOM_FACTOR,
+        sprite.rect.y * ZOOM_FACTOR,
+        sprite.rect.width * ZOOM_FACTOR,
+        sprite.rect.height * ZOOM_FACTOR
+    )
+    scaled_image = pygame.transform.scale(sprite.image, (scaled_rect.width, scaled_rect.height))
+    return scaled_rect, scaled_image
+
+def save_level(filename, platforms, goal, spawn_point, decorations, targets):
+    """Save level data to a JSON file."""
+    level_data = {
+        'platforms': [{'x': p.rect.x, 'y': p.rect.y, 'width': p.width, 'height': p.height, 'breakable': p.breakable}
+                      for p in platforms],
+        'goal': {'x': goal.rect.x, 'y': goal.rect.y, 'width': goal.width, 'height': goal.height},
+        'spawn_point': {'x': spawn_point.rect.x, 'y': spawn_point.rect.y, 'width': spawn_point.width, 'height': spawn_point.height},
+        'decorations': [{'type': d.decoration_type, 'x': d.rect.x, 'y': d.rect.y, 'z_index': d.z_index }
+                        for d in decorations],
+        'targets': [{'x': t.rect.x, 'y': t.rect.y} for t in targets]
+    }
+    with open(filename, 'w') as file:
+        json.dump(level_data, file, indent=4)
+
+def main():
+    # Current room index
+    current_room_index = 0
+    current_decoration_type = list(DECORATION_TYPES.keys())[0]  # Start with first decoration
+
+    # Load level data for the current room
+    level_data = load_level(ROOMS[current_room_index])
+
+    # Load sprites off of data
+    all_sprites, platforms, goal, spawn_point, decorations, targets = load_sprites(level_data)
+
     selected_object = None
     offset_x = 0
     offset_y = 0
@@ -133,6 +161,7 @@ def main():
     next_button_image = pygame.image.load('sprites/edit_mode/next_button.png').convert_alpha()
     decoration_cycle_image = pygame.image.load('sprites/edit_mode/cycle_button.png').convert_alpha()
     add_decoration_image = pygame.image.load('sprites/edit_mode/add_decoration_button.png').convert_alpha()
+    add_target_image = pygame.image.load('sprites/edit_mode/add_target_button.png').convert_alpha()
 
     # Button positions (not scaled)
     add_button_rect = add_button_image.get_rect(topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 10))
@@ -145,9 +174,12 @@ def main():
     add_decoration_rect = add_decoration_image.get_rect(
         topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 3 * BUTTON_HEIGHT + 40)
     )
+    add_target_rect = add_target_image.get_rect(
+        topleft=(SCREEN_WIDTH - BUTTON_WIDTH - 10, 4 * BUTTON_HEIGHT + 50)
+    )
 
-    # Font for displaying current decoration
-    font = pygame.font.Font(None, 24)
+    # Font for displaying current decoration and z-index
+    font = pygame.font.Font(None, 24)  # Default font, size 24
 
     running = True
     while running:
@@ -164,7 +196,7 @@ def main():
                     current_decoration_type = current_types[(current_index + 1) % len(current_types)]
                 elif add_decoration_rect.collidepoint(event.pos):
                     # Add new decoration at default position
-                    new_decoration = Decoration(DECORATION_TYPES[current_decoration_type], 100, 100)
+                    new_decoration = Decoration(DECORATION_TYPES[current_decoration_type], 100, 100, 0)
                     new_decoration.decoration_type = current_decoration_type
                     decorations.add(new_decoration)
                     all_sprites.add(new_decoration)
@@ -173,9 +205,14 @@ def main():
                     new_platform = Platform(100, 100, 200, 20)
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
+                elif add_target_rect.collidepoint(event.pos):
+                    # Add a new target at a default position (unscaled)
+                    new_target = Target(100, 100)
+                    targets.add(new_target)
+                    all_sprites.add(new_target)
                 elif prev_button_rect.collidepoint(event.pos) or next_button_rect.collidepoint(event.pos):
                     # Save current room before switching
-                    save_level(ROOMS[current_room_index], platforms, goal,spawn_point, decorations)
+                    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations, targets)
 
                     # Update room index
                     if prev_button_rect.collidepoint(event.pos):
@@ -191,48 +228,9 @@ def main():
                     decorations.empty()
                     all_sprites.empty()
 
-                    # Load platforms
-                    for platform_data in level_data['platforms']:
-                        platform = Platform(
-                            platform_data['x'],
-                            platform_data['y'],
-                            platform_data['width'],
-                            platform_data['height']
-                        )
-                        platforms.add(platform)
-                        all_sprites.add(platform)
+                    # Load new sprites
+                    all_sprites, platforms, goal, spawn_point, decorations, targets = load_sprites(level_data)
 
-                    # Load goal
-                    goal_data = level_data['goal']
-                    goal = Goal(
-                        goal_data['x'],
-                        goal_data['y'],
-                        goal_data['width'],
-                        goal_data['height']
-                    )
-                    all_sprites.add(goal)
-
-                    # Load spawn point
-                    spawn_point_data = level_data['spawn_point']
-                    spawn_point = SpawnPoint(
-                        spawn_point_data['x'],
-                        spawn_point_data['y'],
-                        spawn_point_data['width'],
-                        spawn_point_data['height']
-                    )
-                    all_sprites.add(spawn_point)
-
-                    # Load decorations
-                    for decoration_data in level_data.get('decorations', []):
-                        decoration = Decoration(
-                            DECORATION_TYPES[decoration_data['type']],
-                            decoration_data['x'],
-                            decoration_data['y'],
-                            decoration_data['z_index']
-                        )
-                        decoration.decoration_type = decoration_data['type']
-                        decorations.add(decoration)
-                        all_sprites.add(decoration)
                 else:
                     for obj in all_sprites:
                         # Check collision with scaled object rect
@@ -273,10 +271,16 @@ def main():
                         selected_object.rect.width += 10
                     elif event.key == pygame.K_s:
                         selected_object.rect.width = max(10, selected_object.rect.width - 10)
+                    elif event.key == pygame.K_b:
+                        selected_object.breakable = not selected_object.breakable
                     # Update the platform's image to reflect the new width
                     selected_object.image = pygame.Surface((selected_object.rect.width, selected_object.rect.height))
                     selected_object.width, selected_object.height = selected_object.rect.width, selected_object.rect.height
-                    selected_object.image.fill(BLACK)
+                    if selected_object.breakable:
+                        selected_object.image.fill(GREY)
+                    else:
+                        selected_object.image.fill(BLACK)
+
                 elif selected_object and isinstance(selected_object, Decoration):
                     if event.key == pygame.K_UP:
                         selected_object.z_index += 1
@@ -286,30 +290,19 @@ def main():
         # Draw everything
         screen.fill(WHITE)
 
-        # Sort decorations by z-index
-        sorted_decorations = sorted(decorations.sprites(), key=lambda x: x.z_index)
+        # Sort all sprites by z-index
+        sorted_sprites = sorted(all_sprites.sprites(), key=lambda x: getattr(x, 'z_index', 0))
 
-        # Draw platforms and other objects
-        for sprite in platforms:
-            scaled_rect = pygame.Rect(
-                sprite.rect.x * ZOOM_FACTOR,
-                sprite.rect.y * ZOOM_FACTOR,
-                sprite.rect.width * ZOOM_FACTOR,
-                sprite.rect.height * ZOOM_FACTOR
-            )
-            scaled_image = pygame.transform.scale(sprite.image, (scaled_rect.width, scaled_rect.height))
+        # Draw all sprites in order
+        for sprite in sorted_sprites:
+            scaled_rect, scaled_image = draw_sprite(sprite)
             screen.blit(scaled_image, scaled_rect.topleft)
 
-        # Draw decorations in sorted order
-        for decoration in sorted_decorations:
-            scaled_rect = pygame.Rect(
-                decoration.rect.x * ZOOM_FACTOR,
-                decoration.rect.y * ZOOM_FACTOR,
-                decoration.rect.width * ZOOM_FACTOR,
-                decoration.rect.height * ZOOM_FACTOR
-            )
-            scaled_image = pygame.transform.scale(decoration.image, (scaled_rect.width, scaled_rect.height))
-            screen.blit(scaled_image, scaled_rect.topleft)
+            # Display z-index for decorations
+            if isinstance(sprite, Decoration):
+                z_index_text = font.render(f"z: {sprite.z_index}", True, BLACK)
+                text_position = (scaled_rect.x, scaled_rect.y - 20)  # Position text above the decoration
+                screen.blit(z_index_text, text_position)
 
         # Draw all buttons (not scaled)
         screen.blit(add_button_image, add_button_rect.topleft)
@@ -318,6 +311,7 @@ def main():
         screen.blit(next_button_image, next_button_rect.topleft)
         screen.blit(decoration_cycle_image, decoration_cycle_rect.topleft)
         screen.blit(add_decoration_image, add_decoration_rect.topleft)
+        screen.blit(add_target_image, add_target_rect.topleft)
 
         # Display current decoration type
         decoration_text = font.render(f"Current: {current_decoration_type}", True, BLACK)
@@ -342,10 +336,9 @@ def main():
         clock.tick(60)
 
     # Save final state before quitting
-    save_level(ROOMS[current_room_index], platforms, goal,spawn_point, decorations)
+    save_level(ROOMS[current_room_index], platforms, goal, spawn_point, decorations, targets)
 
     pygame.quit()
-
 
 if __name__ == '__main__':
     main()

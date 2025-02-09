@@ -1,8 +1,8 @@
 import pygame
 
 # Player settings
-PLAYER_WIDTH = 50
-PLAYER_HEIGHT = 50
+PLAYER_WIDTH = 55
+PLAYER_HEIGHT = 100
 PLAYER_COLOR = (0, 128, 255)
 PLAYER_SPEED = 5
 GRAVITY = 1
@@ -22,7 +22,10 @@ class Player(pygame.sprite.Sprite):
         self.change_x = 0
         self.change_y = 0
         self.on_ground = False
+        self.attacking = False
         self.acceleration = 0
+        self.player_state = False
+        self.last_direction_faced = 'right'  # Initialize last direction faced
 
     def update(self):
         self.calc_grav()
@@ -51,7 +54,7 @@ class Player(pygame.sprite.Sprite):
 
         if not self.on_ground:
             self.set_player_image('sprites/player/player_fall.png')
-        elif self.change_x == 0 and self.acceleration == 0:
+        elif self.change_x == 0 and self.acceleration == 0 and not self.attacking:
             self.set_player_image('sprites/player/player.png')
 
         # Apply acceleration
@@ -92,13 +95,23 @@ class Player(pygame.sprite.Sprite):
             self.change_y = -JUMP_STRENGTH
             self.on_ground = False
 
+    def attack(self):
+        self.attacking = True
+        if self.player_state:
+            self.set_player_image('sprites/player/player_attackB.png')
+        else:
+            self.set_player_image('sprites/player/player_attackA.png')
+        pygame.time.set_timer(pygame.USEREVENT + 1, 100)  # Custom event for ending attack animation
+
     def go_left(self):
         self.acceleration = -ACCELERATION
         self.set_player_image('sprites/player/player_left.png')
+        self.last_direction_faced = 'left'  # Update last direction faced
 
     def go_right(self):
         self.acceleration = ACCELERATION
         self.set_player_image('sprites/player/player_right.png')
+        self.last_direction_faced = 'right'  # Update last direction faced
 
     def stop(self):
         self.acceleration = 0
@@ -111,6 +124,9 @@ class Player(pygame.sprite.Sprite):
             if self.change_x > 0:
                 self.change_x = 0
         self.set_player_image('sprites/player/player.png')
+
+    def switch_player_state(self):
+        self.player_state = not self.player_state
 
     def set_platforms(self, platforms):
         self.platforms = platforms
