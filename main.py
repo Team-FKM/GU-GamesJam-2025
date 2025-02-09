@@ -190,6 +190,17 @@ def pause_menu():
         sys.exit()
         return
 
+
+def winning_screen():
+    font = pygame.font.Font(None, 35)
+    text = font.render("You Win!", True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.fill((0, 0, 0))  # Dark background
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    pygame.time.wait(3000)
+
+
 def main():
     global CURRENT_ROOM
     background = pygame.image.load('backgrounds/glasgow_uni.png').convert_alpha()
@@ -206,6 +217,8 @@ def main():
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
     running = True
     paused = False
+    game_won = False
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -318,6 +331,9 @@ def main():
                     main_menu()
             continue
 
+        if game_won:
+            winning_screen()
+            break
 
         # Update all sprites
         all_sprites.update()
@@ -326,6 +342,9 @@ def main():
             goal, all_sprites, platforms, spawn_point = next_level(player, camera, all_sprites, platforms)
             player.set_platforms(platforms)
             print(f"Moving to {CURRENT_ROOM}")
+            # if current room is higher than 3 then player wins
+            if int(CURRENT_ROOM[4]) > 3:
+                game_won = True
 
         camera.update(player)
         draw_gradient(screen, START_COLOR, END_COLOR)

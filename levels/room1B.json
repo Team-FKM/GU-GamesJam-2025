@@ -1,14 +1,14 @@
 {
     "platforms": [],
     "goal": {
-        "x": 1562,
-        "y": 888,
+        "x": 408,
+        "y": 1106,
         "width": 50,
         "height": 50
     },
     "spawn_point": {
-        "x": 58,
-        "y": 1018,
+        "x": 78,
+        "y": 1120,
         "width": 20,
         "height": 20
     },
