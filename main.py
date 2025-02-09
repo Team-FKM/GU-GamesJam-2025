@@ -157,6 +157,28 @@ def load_room(level_data):
     all_sprites.add(spawn_point)
     return all_sprites, platforms, goal, spawn_point, targets
 
+def pause_menu():
+    font = pygame.font.Font(None, 74)
+    text = font.render("Paused", True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    resume_text = font.render("Press ESC to Resume", True, WHITE)
+    resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    quit_text = font.render("Press Q to Quit", True, WHITE)
+    quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    main_menu_text = font.render("Press SPACE to go to Main Menu", True, WHITE)
+    main_menu_rect = main_menu_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+    
+    screen.fill((0, 0, 0))  # Dark background
+    screen.blit(text, text_rect)
+    screen.blit(resume_text, resume_rect)
+    screen.blit(quit_text, quit_rect)
+    screen.blit(main_menu_text, main_menu_rect)
+    pygame.display.flip()
+    if pygame.key.get_pressed()[pygame.K_q]:
+        pygame.quit()
+        sys.exit()
+        return
+
 def main():
     global CURRENT_ROOM
     background = pygame.image.load('backgrounds/glasgow_uni.png').convert_alpha()
@@ -172,6 +194,7 @@ def main():
     all_sprites.add(player)
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
     running = True
+    paused = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -198,8 +221,8 @@ def main():
                 elif event.key == pygame.K_r:
                     reset_player_and_camera(player, camera, spawn_point)
                     print(f"Resting {CURRENT_ROOM}")
-                elif event.key == pygame.K_ESCAPE:
-                    running = False
+                elif event.key == pygame.K_ESCAPE and not paused:
+                    paused = not paused
                 elif event.key == pygame.K_p:
                     player.attack()
                     # check if player is colliding with breakable platform if so break it
@@ -246,6 +269,16 @@ def main():
                     platforms.add(new_platform)
                     all_sprites.add(new_platform)
 
+
+        if paused:
+            pause_menu()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    paused = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    paused=False
+                    main_menu()
+            continue
         # Update all sprites
         all_sprites.update()
 
