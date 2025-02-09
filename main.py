@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import re
+import random as rnd
 from player import Player
 from camera import Camera
 from game_objects.platform import Platform
@@ -12,6 +13,7 @@ from game_objects.decoration import Decoration
 from game_objects.spawn_point import SpawnPoint
 from game_objects.projectile import Projectile
 from game_objects.target import Target
+from game_objects.particle import Particle
 from menu import main_menu  # Import the menu
 from audio_manager import AudioManager
 
@@ -231,13 +233,13 @@ def main():
                     if player.player_state:
                         if player.last_direction_faced == 'right':
                             # create a projectile from the player towards the right
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow_right.png').convert_alpha(), player.rect.x, player.rect.y + 50, 1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)
                         elif player.last_direction_faced == 'left':
                             # create a projectile from the player towards the left
-                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
+                            projectile = Projectile(pygame.image.load('sprites/projectiles/arrow_left.png').convert_alpha(), player.rect.x, player.rect.y + 50, -1, 10)
                             projectile.set_platforms(platforms)
                             projectile.set_targets(targets)
                             projectiles.add(projectile)
@@ -248,6 +250,21 @@ def main():
                                     platforms.remove(platform)
                                     all_sprites.remove(platform)
                                     player.set_platforms(platforms)
+
+                                    # add three small brown particles
+                                    for i in range(3):  # Create 5 particles instead of 3
+                                        particle = Particle(
+                                            color=(139, 69, 19),  # Brown color
+                                            x=platform.rect.centerx + rnd.randint(-10, 10),
+                                            # Spread particles around
+                                            y=platform.rect.centery + rnd.randint(-10, 10),
+                                            width=rnd.randint(10, 20),  # Random sizes
+                                            height=rnd.randint(10, 15),
+                                            dx=rnd.uniform(-3, 3),  # Random horizontal velocity
+                                            dy=rnd.uniform(-8, -4)  # Initial upward velocity
+                                        )
+                                        all_sprites.add(particle)
+
                                     # set all platforms of projectiles
                                     for sprite in all_sprites:
                                         if isinstance(sprite, Projectile):
