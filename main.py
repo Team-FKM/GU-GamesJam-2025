@@ -174,7 +174,7 @@ def pause_menu():
     # small controls text.
     controls_text = font.render(" Controls: WASD to move, P to attack, R to reset, Enter to switch between environments.", True, WHITE)
     controls_rect = controls_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
-    explanation_text = font.render("Your attack changes when you switch environments.", True, WHITE)
+    explanation_text = font.render("Your attack changes when you switch environments. hit r if you get stuck.", True, WHITE)
     explanation_rect = explanation_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 200))
     
     screen.fill((0, 0, 0))  # Dark background
